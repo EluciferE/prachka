@@ -70,7 +70,7 @@ def check_announce():
             minutes = (announce - now).total_seconds() // 60
             if minutes <= 100 and not status:
                 if not an_times[(announce.hour, announce.minute)]:
-                    if announce_times[0] == False:
+                    if list(announce_times.values())[0] == False:
                         continue
                     users = note_by_date(f"{next_day}.{next_month}.{next_year}")
                     for user in users:
