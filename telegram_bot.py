@@ -40,9 +40,9 @@ machines_buttons = [telebot.types.KeyboardButton(x) for x in ["1", "2", "3"]]
 machines_menu = telebot.types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True, one_time_keyboard=True)
 machines_menu.row(machines_buttons[0], machines_buttons[1], machines_buttons[2])
 
-standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Текущее расписание", "Текущая запись",
+standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Текущее расписание", "Мои записи",
                                                               "Настроить расписание", "Удалить запись",
-                                                              "Удалить расписание" ]]
+                                                              "Удалить расписание"]]
 stand_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 stand_menu.row(standard_buttons[0], standard_buttons[1])
 stand_menu.row(standard_buttons[2], standard_buttons[3])
@@ -64,7 +64,6 @@ def send_messages():
                 chat_id = list(chat_id)[0]
                 bot.send_message(chat_id, message[1])
                 remove_message(message[0], message[1])
-                tg_logger.info(f"[SEND] - {message[0]}: {message[1]}")
         except Exception as e:
             tg_logger.error(f"[SEND] - {e}")
 
@@ -93,24 +92,72 @@ def any_command(message):
             change_status(user, "Logged MainMenu")
 
     elif "Logged" in status:
-        if text == "Текущая запись":
-            note = get_note(user)
-            if note:
-                bot.send_message(message.chat.id, f"Дата: {note[1]}\n"
-                                                  f"День недели: {note[2]}\n"
-                                                  f"Время: {note[3]}\n"
-                                                  f"Машинка: {note[4]}\n", reply_markup=stand_menu)
-            else:
-                bot.send_message(message.chat.id, "В данный момент у вас нет записи", reply_markup=stand_menu)
+        if text == "Мои записи":
+            notes = get_notes(user)
+            ans = ""
+            if notes:
+                for note in notes:
+                    ans += f"Дата: {note[1]}\nДень недели: {note[2]}\n" \
+                           f"Время: {note[3]}\nМашинка: {note[4]}\n\n"
+                bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
+
+            if not notes:
+                bot.send_message(message.chat.id, "В данный момент у вас нет записей", reply_markup=stand_menu)
 
         elif text == "Удалить запись":
-            note = get_note(user)
-            if note:
-                delete_note(username=user)
-                bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
-                sheet.write("", note[6])
+            notes = get_notes(user)
+            if not notes:
+                bot.send_message(message.chat.id, "У вас нет записей", reply_markup=stand_menu)
+            elif len(notes) == 1:
+                note = notes[0]
+                bot.send_message(message.chat.id, f"Ваша запись:\n\n"
+                                                  f"Дата: {note[1]}\n"
+                                                  f"День недели: {note[2]}\n"
+                                                  f"Время: {note[3]}\n"
+                                                  f"Машинка: {note[4]}\n\nУдалить?", reply_markup=accept_menu)
+                change_status(user, "Logged/DeleteSingleNote")
             else:
-                bot.send_message(message.chat.id, "У вас нет записи", reply_markup=stand_menu)
+                ans = "Ваши записи:\n\n"
+                dates = []
+                for note in notes:
+                    dates.append(note[1])
+                    ans += f"Дата: {note[1]}\nДень недели: {note[2]}\n" \
+                           f"Время: {note[3]}\nМашинка: {note[4]}\n\n"
+                ans += "Какую хотите удалить?"
+                tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
+                tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
+                                                                 one_time_keyboard=True)
+                tmp_keyboard.row(tmp_buttons[0], tmp_buttons[1])
+                tmp_keyboard.row(tmp_buttons[2])
+                bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
+                change_status(user, "Logged/DeleteMultiNote")
+
+        elif "DeleteMultiNote" in status:
+            if text == "Отмена":
+                bot.send_message(message.chat.id, "Ок...", reply_markup=stand_menu)
+            deleted = False
+            notes = get_notes(user)
+            for note in notes:
+                if text == note[1]:
+                    delete_note(user, text)
+                    sheet.write("", note[6])
+                    deleted = True
+            if deleted:
+                change_status(user, "Logged")
+                bot.send_message(message.chat.id, "Запись была удалена", reply_markup=stand_menu)
+            else:
+                change_status(user, "Logged")
+                bot.send_message(message.chat.id, "Некоректная дата (или баг, ахах))", reply_markup=stand_menu)
+
+        elif "DeleteSingleNote" in status:
+            if text == "Подтвердить":
+                note = get_notes(user)[0]
+                delete_note(user, note[1])
+                sheet.write("", note[6])
+                bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
+            elif text == "Отмена":
+                bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
+            change_status(user, "Logged")
 
         elif text == "Текущее расписание":
             req = get_request(user)
@@ -136,12 +183,12 @@ def any_command(message):
                 change_status(user, "Logged")
             else:
                 req = req[0]
-                change_status(user, "Logged/Delete")
+                change_status(user, "Logged/DeleteTimetable")
                 bot.send_message(message.chat.id, f"Удалить это расписание?\nДень недели: {req[1]}\n"
                                                   f"Время: {req[2]}\n"
                                                   f"Машинка: {req[3]}\n"
                                                   f"Запись: {req[4]}", reply_markup=accept_menu)
-        elif "Delete" in status:
+        elif "DeleteTimetable" in status:
             if text == "Подтвердить":
                 change_status(user, "Logged")
                 delete_request(user)

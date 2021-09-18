@@ -114,11 +114,11 @@ class Sheet:
                             good_places.append(place)
                     else:
                         # ГОВНОКОД, ИДИ НАХУЙ
-                        for machine in ["1", "2", "3"]:
-                            if len(row) <= machines[machine] or not row[machines[machine]]:
-                                cell = f"{letters[machine]}{line}"
+                        for machine_try in ["1", "2", "3"]:
+                            if len(row) <= machines[machine_try] or not row[machines[machine_try]]:
+                                cell = f"{letters[machine_try]}{line}"
                                 place = {"date": cur_date, "day": cur_day,
-                                         "time": time, "machine": machine, "cell": cell}
+                                         "time": time, "machine": machine_try, "cell": cell}
                                 if self._valid_date(cur_date):
                                     good_places.append(place)
 

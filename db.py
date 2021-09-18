@@ -150,24 +150,22 @@ def made_note(username, place, value):
         db_logger.error(e)
 
 
-def delete_note(username):
+def delete_note(username, date):
     try:
         with lock:
-            cur.execute('''DELETE FROM notes WHERE username=(?)''', (username,))
+            cur.execute('''DELETE FROM notes WHERE username=(?) AND date=(?)''', (username, date))
             con.commit()
     except Exception as e:
         db_logger.error(e)
 
 
-def get_note(username):
+def get_notes(username):
     try:
         with lock:
-            user = cur.execute('''SELECT * FROM notes WHERE username=(?)''', (username,))
+            notes = cur.execute('''SELECT * FROM notes WHERE username=(?)''', (username,))
             con.commit()
-            user = [x for x in user]
-            if user:
-                user = user[0]
-            return user
+            notes = [x for x in notes]
+            return notes
     except Exception as e:
         db_logger.error(e)
 

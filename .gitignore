@@ -5,3 +5,5 @@ main.db
 run.sh
 stop.sh
 token.json
+.idea/*
+__pycache__/*

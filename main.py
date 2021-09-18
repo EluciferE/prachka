@@ -1,8 +1,8 @@
 from module import Sheet, auth
 from db import get_requests, add_message, made_note, \
-    note_by_time, note_by_date
+    note_by_time, note_by_date, get_notes
 from time import sleep
-from datetime import datetime, time, timedelta
+from datetime import datetime, time, timedelta, date
 from threading import Thread
 
 announce_times = {}
@@ -20,16 +20,22 @@ def main():
         requests = get_requests()
         for req in requests:
             places = sheet.find_places(req[1], req[2], req[3])
-            #Проверка на то, что я его уже сегодня записал
-            users = note_by_date(date_now())
-            if req[0] in users:
-                continue
-                
-            if places:
+            # Проверим, записан ли он на этой неделе
+            user_weeks = []
+            notes = get_notes(req[0])
+            for note in notes:
+                user_weeks.append(number_of_week(note[1]))
+            for place in places:
+                target_week = number_of_week(place['date'])
+
+                if target_week in user_weeks:
+                    continue
+
                 if not sheet.write(req[4], places[-1]["cell"]):
                     add_message(req[0], f"Записал тебя на стрику\n"
-                                        f"{req[1]}\n{req[2]}\nМашинка: {places[-1]['machine']}")
-                    made_note(req[0], places[-1], req[4])
+                                        f"{req[1]}\n{req[2]}\nМашинка: {place['machine']}")
+                    made_note(req[0], place, req[4])
+                    user_weeks.append(number_of_week(place['date']))
 
         sleep(60)
 
@@ -70,7 +76,7 @@ def check_announce():
             minutes = (announce - now).total_seconds() // 60
             if minutes <= 100 and not status:
                 if not an_times[(announce.hour, announce.minute)]:
-                    if list(announce_times.values())[0] == False:
+                    if not list(announce_times.values())[0]:
                         continue
                     users = note_by_date(f"{next_day}.{next_month}.{next_year}")
                     for user in users:
@@ -93,6 +99,12 @@ def date_now():
     now_day = '0' * (2 - len(now_day)) + now_day
     now_month = '0' * (2 - len(now_month)) + now_month
     return f"{now_day}.{now_month}.{now_year}"
+
+
+def number_of_week(date_):
+    d, m, y = map(int, date_.split('.'))
+    w = date(y, m, d).isocalendar()[1]
+    return w
 
 
 if __name__ == '__main__':
