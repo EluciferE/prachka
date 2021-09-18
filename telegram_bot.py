@@ -155,7 +155,7 @@ def any_command(message):
                 delete_note(user, note[1])
                 sheet.write("", note[6])
                 bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
-            elif text == "Отмена":
+            else:
                 bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
             change_status(user, "Logged")
 
