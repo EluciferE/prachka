@@ -8,6 +8,18 @@ from main import sheet
 
 bot = telebot.TeleBot(token)
 
+banner = """Привет, это бот для пачечной 5 общаги НГУ
+            Он будет записывать тебя по нужному времени на стиральную машинку.
+            Ему от тебя нужно только расписание(день недели/время/машинка)
+            Если эта машинка будет занята, то он будет пытаться ставить на другие
+            
+            Также он показывает твои записи и может их удалять с документа
+            (но не из списка охранницы T_T)
+            
+            Возможно он будет напоминать тебе за день и за час до стирки
+            (но это ещё не точно)
+            Если что-то пойдет не так, то пишите @EluciferE"""
+
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
 logging.basicConfig(level=logging.INFO)
@@ -82,7 +94,7 @@ def any_command(message):
 
     if not status:
         add_user(message.chat.id, user)
-        bot.send_message(message.chat.id, "Ку, введи пароль ^^")
+        bot.send_message(message.chat.id, banner)
 
     elif "Not logged" in status:
         if text != "^^":
