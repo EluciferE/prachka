@@ -1,6 +1,6 @@
 from module import Sheet, auth
 from db import get_requests, add_message, made_note, \
-    note_by_time, note_by_date, get_notes
+    note_by_time, note_by_date, get_notes, all_notes, delete_note
 from time import sleep
 from datetime import datetime, time, timedelta, date
 from threading import Thread
@@ -57,6 +57,11 @@ def update_announce():
             datetime(year, month, day, an_time[0], an_time[1]): (an_time[0] * 60 + an_time[0]) < (hours * 60 + minute)
             for an_time in an_times}
 
+    notes = all_notes()
+    for note in notes:
+        if pasted_date(note[1]):
+            delete_note(note[0], note[1])
+
 
 def check_announce():
     global announce_times
@@ -99,6 +104,13 @@ def date_now():
     now_day = '0' * (2 - len(now_day)) + now_day
     now_month = '0' * (2 - len(now_month)) + now_month
     return f"{now_day}.{now_month}.{now_year}"
+
+
+def pasted_date(date_):
+    now = datetime.today()
+    now = datetime(now.year, now.month, now.day)
+    date_ = datetime.strptime(date_, "%d.%m.%Y")
+    return now > date_
 
 
 def number_of_week(date_):
