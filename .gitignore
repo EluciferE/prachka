@@ -1,0 +1,5 @@
+logs/*
+config.py
+credentials.json
+main.db
+token.json
