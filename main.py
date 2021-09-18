@@ -24,14 +24,11 @@ def main():
             users = note_by_date(date_now())
             if req[0] in users:
                 continue
-
+                
             if places:
                 if not sheet.write(req[4], places[-1]["cell"]):
                     add_message(req[0], f"Записал тебя на стрику\n"
-                                        f"{req[1]}\n{req[2]}\nМашинка: {places['machine']}")
-                    sleep(1)
-                    send_messages()
-
+                                        f"{req[1]}\n{req[2]}\nМашинка: {places[-1]['machine']}")
                     made_note(req[0], places[-1], req[4])
 
         sleep(60)
@@ -73,6 +70,8 @@ def check_announce():
             minutes = (announce - now).total_seconds() // 60
             if minutes <= 100 and not status:
                 if not an_times[(announce.hour, announce.minute)]:
+                    if announce_times[0] == False:
+                        continue
                     users = note_by_date(f"{next_day}.{next_month}.{next_year}")
                     for user in users:
                         user = str(user[0])

@@ -56,7 +56,7 @@ accept_menu.row(accept_buttons[0], accept_buttons[1])
 
 def send_messages():
     while True:
-        sleep(60)
+        sleep(5)
         try:
             messages = get_messages()
             for message in messages:
@@ -137,7 +137,7 @@ def any_command(message):
             else:
                 req = req[0]
                 change_status(user, "Logged/Delete")
-                bot.send_message(message.chat.id, f"Удалить эту запись?\nДень недели: {req[1]}\n"
+                bot.send_message(message.chat.id, f"Удалить это расписание?\nДень недели: {req[1]}\n"
                                                   f"Время: {req[2]}\n"
                                                   f"Машинка: {req[3]}\n"
                                                   f"Запись: {req[4]}", reply_markup=accept_menu)
@@ -145,7 +145,10 @@ def any_command(message):
             if text == "Подтвердить":
                 change_status(user, "Logged")
                 delete_request(user)
-                bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Расписание удалено!", reply_markup=stand_menu)
+            elif text == "Отмена":
+                change_status(user, "Logged")
+                bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_menu)
 
         elif text in list(map(lambda x: x.capitalize(), days)) and \
                 len(status.split("/")) == 2:
