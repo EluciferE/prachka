@@ -188,3 +188,12 @@ def note_by_date(date):
             return [x for x in users]
     except Exception as e:
         db_logger.error(e)
+
+
+def all_notes():
+    try:
+        with lock:
+            ans = cur.execute('''SELECT * FROM notes''')
+            return [x for x in ans]
+    except Exception as e:
+        db_logger.error(e)
