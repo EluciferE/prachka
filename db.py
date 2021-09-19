@@ -20,7 +20,7 @@ cur = con.cursor()
 cur.execute('''CREATE TABLE IF NOT EXISTS requests
                        (username text UNIQUE, day text, time text, machine text, value text)''')
 cur.execute('''CREATE TABLE IF NOT EXISTS users
-                       (chat_id text, username text UNIQUE, status text)''')
+                       (chat_id text, username text UNIQUE, status text, tmp text)''')
 cur.execute('''CREATE TABLE IF NOT EXISTS messages
                        (username text, value text)''')
 cur.execute('''CREATE TABLE IF NOT EXISTS notes
@@ -105,7 +105,28 @@ def change_status(username, status):
 def add_user(chat_id, username):
     try:
         with lock:
-            cur.execute('''INSERT INTO users VALUES ((?), (?), (?))''', (chat_id, username, 'Not logged'))
+            cur.execute('''INSERT INTO users VALUES ((?), (?), (?), (?))''', (chat_id, username, 'Not logged', ''))
+        con.commit()
+    except Exception as e:
+        db_logger.error(e)
+
+
+def get_tmp(username):
+    try:
+        with lock:
+            tmp = cur.execute('''Select tmp from users where username=(?)''', (username,))
+            tmp = [x for x in tmp]
+            if tmp:
+                return list(tmp[0])[0]
+            return []
+    except Exception as e:
+        db_logger.error(e)
+
+
+def change_tmp(username, tmp):
+    try:
+        with lock:
+            cur.execute('''UPDATE users SET tmp=(?) WHERE username=(?)''', (tmp, username))
         con.commit()
     except Exception as e:
         db_logger.error(e)
