@@ -18,6 +18,9 @@ banner = "Привет, это бот для прачечной 5 общаги �
          "(но это ещё не точно)\n" \
          "Если что-то пойдет не так, то пишите @EluciferE"
 
+TIMETABLE = "День недели: {}\nВремя: {}\nМашинка: {}\nЗапись: {}"
+NOTE = "Дата: {}\nДень недели: {}\nВремя: {}\nМашинка: {}"
+
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
 logging.basicConfig(level=logging.INFO)
@@ -99,16 +102,16 @@ def any_command(message):
             bot.send_message(message.chat.id, "Неправильный пароль =(")
         else:
             bot.send_message(message.chat.id, "Congrats!", reply_markup=stand_menu)
-            change_status(user, "Logged MainMenu")
+            change_status(user, "MainMenu")
 
-    elif "Logged" in status:
+    elif "MainMenu" in status:
+
         if text == "Мои записи":
             notes = get_notes(user)
             ans = ""
             if notes:
                 for note in notes:
-                    ans += f"Дата: {note[1]}\nДень недели: {note[2]}\n" \
-                           f"Время: {note[3]}\nМашинка: {note[4]}\n\n"
+                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n'
                 bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
 
             if not notes:
@@ -120,19 +123,16 @@ def any_command(message):
                 bot.send_message(message.chat.id, "У вас нет записей", reply_markup=stand_menu)
             elif len(notes) == 1:
                 note = notes[0]
-                bot.send_message(message.chat.id, f"Ваша запись:\n\n"
-                                                  f"Дата: {note[1]}\n"
-                                                  f"День недели: {note[2]}\n"
-                                                  f"Время: {note[3]}\n"
-                                                  f"Машинка: {note[4]}\n\nУдалить?", reply_markup=accept_menu)
-                change_status(user, "Logged/DeleteSingleNote")
+                bot.send_message(message.chat.id,
+                                 f"Ваша запись:\n\n" + NOTE.format(note[1], note[2], note[3], note[4]) +
+                                 "\nУдалить?", reply_markup=accept_menu)
+                change_status(user, "DeleteSingleNote")
             else:
                 ans = "Ваши записи:\n\n"
                 dates = []
                 for note in notes:
                     dates.append(note[1])
-                    ans += f"Дата: {note[1]}\nДень недели: {note[2]}\n" \
-                           f"Время: {note[3]}\nМашинка: {note[4]}\n\n"
+                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n'
                 ans += "Какую хотите удалить?"
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
                 tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
@@ -140,11 +140,47 @@ def any_command(message):
                 tmp_keyboard.row(tmp_buttons[0], tmp_buttons[1])
                 tmp_keyboard.row(tmp_buttons[2])
                 bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
-                change_status(user, "Logged/DeleteMultiNote")
+                change_status(user, "DeleteMultiNote")
 
-        elif "DeleteMultiNote" in status:
-            if text == "Отмена":
-                bot.send_message(message.chat.id, "Ок...", reply_markup=stand_menu)
+        elif text == "Текущее расписание":
+            req = get_request(user)
+            if not req:
+                bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
+            else:
+                req = req[0]
+                bot.send_message(message.chat.id, TIMETABLE.format(req[1], req[2], req[3], req[4]),
+                                 reply_markup=stand_menu)
+
+        elif text == "Настроить расписание":
+            change_status(user, "ChooseDay")
+            bot.send_message(message.chat.id, "Выберете день:", reply_markup=days_menu)
+
+        elif text == "Удалить расписание":
+            req = get_request(user)
+
+            if not req:
+                bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
+            else:
+                req = req[0]
+                change_status(user, "DeleteTimetable")
+                bot.send_message(message.chat.id, f"Удалить это расписание?\n" +
+                                 TIMETABLE.format(req[1], req[2], req[3], req[4]), reply_markup=accept_menu)
+
+    elif "DeleteSingleNote" in status:
+        if text == "Подтвердить":
+            note = get_notes(user)[0]
+            delete_note(user, note[1])
+            sheet.write("", note[6])
+            bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
+        else:
+            bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
+        change_status(user, "MainMenu")
+
+    elif "DeleteMultiNote" in status:
+        if text == "Отмена":
+            bot.send_message(message.chat.id, "Ок...", reply_markup=stand_menu)
+            change_status(user, "MainMenu")
+        else:
             deleted = False
             notes = get_notes(user)
             for note in notes:
@@ -153,99 +189,81 @@ def any_command(message):
                     sheet.write("", note[6])
                     deleted = True
             if deleted:
-                change_status(user, "Logged")
+                change_status(user, "MainMenu")
                 bot.send_message(message.chat.id, "Запись была удалена", reply_markup=stand_menu)
             else:
-                change_status(user, "Logged")
+                change_status(user, "MainMenu")
                 bot.send_message(message.chat.id, "Некоректная дата (или баг, ахах))", reply_markup=stand_menu)
 
-        elif "DeleteSingleNote" in status:
-            if text == "Подтвердить":
-                note = get_notes(user)[0]
-                delete_note(user, note[1])
-                sheet.write("", note[6])
-                bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
-            else:
-                bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
-            change_status(user, "Logged")
+    elif "DeleteTimetable" in status:
+        change_status(user, "MainMenu")
+        if text == "Подтвердить":
+            delete_request(user)
+            bot.send_message(message.chat.id, "Расписание удалено!", reply_markup=stand_menu)
+        elif text == "Отмена":
+            bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_menu)
 
-        elif text == "Текущее расписание":
-            req = get_request(user)
-            if not req:
-                bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
-                change_status(user, "Logged")
-            else:
-                req = req[0]
-                bot.send_message(message.chat.id, f"День недели: {req[1]}\n"
-                                                  f"Время: {req[2]}\n"
-                                                  f"Машинка: {req[3]}\n"
-                                                  f"Запись: {req[4]}", reply_markup=stand_menu)
-
-        elif text == "Настроить расписание":
-            change_status(user, "Logged/Day")
-            bot.send_message(message.chat.id, "Выберете день:", reply_markup=days_menu)
-
-        elif text == "Удалить расписание":
-            req = get_request(user)
-
-            if not req:
-                bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
-                change_status(user, "Logged")
-            else:
-                req = req[0]
-                change_status(user, "Logged/DeleteTimetable")
-                bot.send_message(message.chat.id, f"Удалить это расписание?\nДень недели: {req[1]}\n"
-                                                  f"Время: {req[2]}\n"
-                                                  f"Машинка: {req[3]}\n"
-                                                  f"Запись: {req[4]}", reply_markup=accept_menu)
-        elif "DeleteTimetable" in status:
-            if text == "Подтвердить":
-                change_status(user, "Logged")
-                delete_request(user)
-                bot.send_message(message.chat.id, "Расписание удалено!", reply_markup=stand_menu)
-            elif text == "Отмена":
-                change_status(user, "Logged")
-                bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_menu)
-
-        elif text in list(map(lambda x: x.capitalize(), days)) and \
-                len(status.split("/")) == 2:
-
-            change_status(user, f"Logged/{text}")
-            if text == "Среда":
+    elif "ChooseDay" in status:
+        text = text.lower()
+        if text not in days:
+            bot.send_message(message.chat.id, "Некорректный день", reply_markup=days_menu)
+        else:
+            change_status(user, f"ChooseTime")
+            change_tmp(user, f"{text}/")
+            if text == "среда":
                 bot.send_message(message.chat.id, "Выберете время:", reply_markup=wedn_times_menu)
             else:
                 bot.send_message(message.chat.id, "Выберете время:", reply_markup=times_menu)
 
-        elif text in times and len(status.split("/")) == 2:
-            change_status(user, status + f"/{text}")
+    elif "ChooseTime" in status:
+        day = get_tmp(user).split('/')[0]
+
+        if day == "среда" and text not in times[2:]:
+            bot.send_message(message.chat.id, "Некорректное время", reply_markup=wedn_times_menu)
+
+        elif text not in times:
+            bot.send_message(message.chat.id, "Некорректное время", reply_markup=times_menu)
+
+        else:
+            change_status(user, "ChooseMachine")
+            tmp = get_tmp(user)
+            change_tmp(user, tmp + f'{text}/')
             bot.send_message(message.chat.id, "Выберете машинку:", reply_markup=machines_menu)
 
-        elif text in ["1", "2", "3"] and len(status.split("/")) == 3:
-            change_status(user, status + f"/{text}")
-            bot.send_message(message.chat.id, "Что вписать в таблицу?", reply_markup=None)
+    elif "ChooseMachine" in status:
+        if text not in ["1", "2", "3"]:
+            bot.send_message(message.chat.id, "Некорректный номер машинки", reply_markup=machines_menu)
+        else:
+            tmp = get_tmp(user)
+            change_tmp(user, tmp + f"{text}/")
+            change_status(user, "WriteNote")
+            bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228б)", reply_markup=None)
 
-        elif len(status.split("/")) == 4:
-            change_status(user, status + f"/{text}")
-            day = status.split("/")[1]
-            time = status.split("/")[2]
-            machine = status.split("/")[3]
-            bot.send_message(message.chat.id, f"День недели: {day}\n"
-                                              f"Время: {time}\n"
-                                              f"Машинка: {machine}\n"
-                                              f"Вписать туда: {text}", reply_markup=accept_menu)
-        elif len(status.split("/")) >= 5:
-            if text == "Подтвердить":
-                delete_request(user)
-                request = {"day": status.split("/")[1],
-                           "time": status.split("/")[2],
-                           "machine": status.split("/")[3],
-                           "value": "/".join(status.split("/")[4:])}
-                insert_request(user, request)
-                change_status(user, "Logged")
-                bot.send_message(message.chat.id, "Запись сохранена", reply_markup=stand_menu)
-            elif text == "Отмена":
-                change_status(user, "Logged")
-                bot.send_message(message.chat.id, "Запись не сохранена", reply_markup=stand_menu)
+    elif "WriteNote" in status:
+        if len(text) > 30:
+            bot.send_message(message.chat.id, "Слишком много...")
+        else:
+            tmp = get_tmp(user)
+            change_tmp(user, tmp + f"{text}")
+            change_status(user, "AcceptTimetable")
+            day = tmp.split("/")[0]
+            time = tmp.split("/")[1]
+            machine = tmp.split("/")[2]
+            bot.send_message(message.chat.id, TIMETABLE.format(day, time, machine, text),
+                             reply_markup=accept_menu)
+
+    elif "AcceptTimetable" in status:
+        if text == "Подтвердить":
+            delete_request(user)
+            tmp = get_tmp(user)
+            request = {"day": tmp.split("/")[0], "time": tmp.split("/")[1],
+                       "machine": tmp.split("/")[2], "value": "/".join(tmp.split("/")[3:])}
+            insert_request(user, request)
+            change_status(user, "MainMenu")
+            bot.send_message(message.chat.id, "Запись сохранена", reply_markup=stand_menu)
+        else:
+            change_status(user, "MainMenu")
+            bot.send_message(message.chat.id, "Запись не сохранена", reply_markup=stand_menu)
 
 
 Thread(target=send_messages).start()
