@@ -6,6 +6,8 @@ from threading import Thread
 from time import sleep
 from main import sheet, date_now
 
+import gc
+
 bot = telebot.TeleBot(token)
 
 banner = "Привет, это бот для прачечной 5 общаги НГУ\n" \
@@ -136,7 +138,7 @@ def any_command(message):
                 note = notes[0]
                 bot.send_message(message.chat.id,
                                  f"Ваша запись:\n\n" + NOTE.format(note[1], note[2], note[3], note[4]) +
-                                 "\nУдалить?", reply_markup=accept_menu)
+                                 "\n\nУдалить?", reply_markup=accept_menu)
                 change_status(user, "DeleteSingleNote")
             else:
                 ans = "Ваши записи:\n\n"
@@ -234,6 +236,7 @@ def any_command(message):
             note = get_notes(user)[0]
             delete_note(user, note[1])
             sheet.write("", note[6])
+            gc.collect()
             bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
         else:
             bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
@@ -250,6 +253,7 @@ def any_command(message):
                 if text == note[1]:
                     delete_note(user, text)
                     sheet.write("", note[6])
+                    gc.collect()
                     deleted = True
             if deleted:
                 change_status(user, "MainMenu")
