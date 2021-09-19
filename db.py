@@ -25,6 +25,44 @@ cur.execute('''CREATE TABLE IF NOT EXISTS messages
                        (username text, value text)''')
 cur.execute('''CREATE TABLE IF NOT EXISTS notes
                        (username text, date text, day text, time text, machine text, value text, cell text)''')
+cur.execute('''CREATE TABLE IF NOT EXISTS signup
+                       (username text, date text)''')
+
+
+def insert_signup(username, date):
+    try:
+        with lock:
+            cur.execute('''INSERT INTO signup VALUES ((?), (?))''', (username, date))
+        con.commit()
+    except Exception as e:
+        db_logger.error(e)
+
+
+def get_signups():
+    try:
+        with lock:
+            req = cur.execute('''SELECT * FROM signup''')
+        return [x for x in req]
+    except Exception as e:
+        db_logger.error(e)
+
+
+def get_signup(username):
+    try:
+        with lock:
+            req = cur.execute('''SELECT * FROM signup WHERE username=(?)''', (username,))
+        return [x for x in req]
+    except Exception as e:
+        db_logger.error(e)
+
+
+def accept_signup(username):
+    try:
+        with lock:
+            cur.execute('''DELETE FROM signup WHERE username=(?)''', (username,))
+        con.commit()
+    except Exception as e:
+        db_logger.error(e)
 
 
 def insert_request(username, request):
@@ -60,7 +98,7 @@ def get_request(username):
 def get_users():
     try:
         with lock:
-            ans = cur.execute('''SELECT * FROM users''')
+            ans = cur.execute('''SELECT username FROM users where status != "New" and status != "AskAllow"''')
         return [x for x in ans]
     except Exception as e:
         db_logger.error(e)
@@ -70,7 +108,10 @@ def get_chat_id(username):
     try:
         with lock:
             ans = cur.execute('''SELECT chat_id FROM users WHERE username=(?)''', (username,))
-        return [x for x in ans]
+        ans = [x for x in ans]
+        if ans:
+            return list(ans[0])[0]
+        return []
     except Exception as e:
         db_logger.error(e)
 
@@ -79,7 +120,10 @@ def user_status(username):
     try:
         with lock:
             ans = cur.execute('''SELECT status FROM users WHERE username=(?)''', (username,))
-        return [x for x in ans]
+        ans = [x for x in ans]
+        if ans:
+            return ans[0][0]
+        return []
     except Exception as e:
         print(e)
 
@@ -105,7 +149,7 @@ def change_status(username, status):
 def add_user(chat_id, username):
     try:
         with lock:
-            cur.execute('''INSERT INTO users VALUES ((?), (?), (?), (?))''', (chat_id, username, 'Not logged', ''))
+            cur.execute('''INSERT INTO users VALUES ((?), (?), (?), (?))''', (chat_id, username, 'New', ''))
         con.commit()
     except Exception as e:
         db_logger.error(e)

@@ -4,7 +4,7 @@ import logging
 from db import *
 from threading import Thread
 from time import sleep
-from main import sheet
+from main import sheet, date_now
 
 bot = telebot.TeleBot(token)
 
@@ -34,7 +34,16 @@ tg_logger.propagate = False
 times = ["8:45 - 10:45", "12:00 - 14:00", "16:00 - 18:00", "20:00 - 22:00"]
 days = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
 
-# BUTTONS
+# BUTTONS/MENUS
+first_menu = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+first_menu.row(telebot.types.KeyboardButton("Запросить доступ к боту"))
+
+admin_but = [telebot.types.KeyboardButton(x) for x in ['Запросы на доступ', 'Пользователи',
+                                                       'Основное меню']]
+admin_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+admin_keyboard.row(admin_but[0], admin_but[1])
+admin_keyboard.row(admin_but[2])
+
 days_buttons = [telebot.types.KeyboardButton(x.capitalize()) for x in days]
 days_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
 days_menu.row(days_buttons[0], days_buttons[1], days_buttons[2])
@@ -67,14 +76,18 @@ accept_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=Tru
 accept_menu.row(accept_buttons[0], accept_buttons[1])
 
 
+def send_to_admin(msg):
+    id_ = get_chat_id("EluciferE")
+    bot.send_message(id_, msg)
+
+
 def send_messages():
     while True:
         sleep(5)
         try:
             messages = get_messages()
             for message in messages:
-                chat_id = get_chat_id(message[0])[0]
-                chat_id = list(chat_id)[0]
+                chat_id = get_chat_id(message[0])
                 bot.send_message(chat_id, message[1])
                 remove_message(message[0], message[1])
         except Exception as e:
@@ -90,22 +103,20 @@ def any_command(message):
 
     status = user_status(user)
 
-    if status:
-        status = status[0][0]
-
     if not status:
         add_user(message.chat.id, user)
-        bot.send_message(message.chat.id, banner)
+        bot.send_message(message.chat.id, banner, reply_markup=first_menu)
 
-    elif "Not logged" in status:
-        if text != "^^":
-            bot.send_message(message.chat.id, "Неправильный пароль =(")
-        else:
-            bot.send_message(message.chat.id, "Congrats!", reply_markup=stand_menu)
-            change_status(user, "MainMenu")
+    elif "New" in status and text == "Запросить доступ к боту":
+        insert_signup(user, date_now())
+        change_status(user, "AskAllow")
+        send_to_admin(f"*{user} запрашивает доступ к боту*")
+        bot.send_message(message.chat.id, "Запрос отправлен")
+
+    elif "AskAllow" in status:
+        bot.send_message(message.chat.id, "Вы уже запросили доступ")
 
     elif "MainMenu" in status:
-
         if text == "Мои записи":
             notes = get_notes(user)
             ans = ""
@@ -165,6 +176,55 @@ def any_command(message):
                 change_status(user, "DeleteTimetable")
                 bot.send_message(message.chat.id, f"Удалить это расписание?\n" +
                                  TIMETABLE.format(req[1], req[2], req[3], req[4]), reply_markup=accept_menu)
+        elif text.lower() == 'admin':
+            if user == "EluciferE":
+                change_status(user, "AdminMenu")
+                bot.send_message(message.chat.id, "^^ приветик ^^", reply_markup=admin_keyboard)
+            else:
+                bot.send_message(message.chat.id, "Тебе сюда нельзя, бяка >:((", reply_markup=stand_menu)
+
+        else:
+            bot.send_message(message.chat.id, "Некорректная команда", reply_markup=stand_menu)
+
+    elif "AdminMenu" in status:
+        if text == "Запросы на доступ":
+            signups = get_signups()
+            ans, users = "", []
+            for info in signups:
+                user, date = info
+                ans += f"{date} - {user}\n"
+                users.append(user)
+            ans += "Одобрить кому-нибудь доступ?"
+
+            tmp_buttons = [telebot.types.KeyboardButton(x) for x in users + ["Отмена"]]
+            tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True,
+                                                             one_time_keyboard=True)
+            for but in tmp_buttons:
+                tmp_keyboard.row(but)
+
+            bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
+            change_status(user, "AcceptAccess")
+
+        elif text == "Пользователи":
+            users = get_users()
+            ans = '\n'.join([list(x)[0] for x in users])
+            bot.send_message(message.chat.id, ans, reply_markup=admin_keyboard)
+
+        elif text == "Основное меню":
+            bot.send_message(message.chat.id, "Как прикажете", reply_markup=stand_menu)
+            change_status(user, "MainMenu")
+
+    elif "AcceptAccess" in status:
+        if text == "Отмена":
+            bot.send_message(message.chat.id, "Как скажешь", reply_markup=admin_keyboard)
+        elif get_signup(text):
+            accept_signup(text)
+            bot.send_message(get_chat_id(text), "Можешь записываться ^^", reply_markup=stand_menu)
+            change_status(text, "MainMenu")
+            bot.send_message(message.chat.id, "Вы такой щедрый ^^", reply_markup=admin_keyboard)
+        else:
+            bot.send_message(user, "Я не смогла найти такого пользователя T_T", reply_markup=admin_keyboard)
+        change_status(text, "AdminMenu")
 
     elif "DeleteSingleNote" in status:
         if text == "Подтвердить":
@@ -260,6 +320,7 @@ def any_command(message):
                        "machine": tmp.split("/")[2], "value": "/".join(tmp.split("/")[3:])}
             insert_request(user, request)
             change_status(user, "MainMenu")
+            change_tmp(user, "")
             bot.send_message(message.chat.id, "Запись сохранена", reply_markup=stand_menu)
         else:
             change_status(user, "MainMenu")
