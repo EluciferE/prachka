@@ -6,6 +6,8 @@ from google.oauth2.credentials import Credentials
 from datetime import datetime
 from time import sleep
 
+import gc
+
 from threading import Thread
 import logging
 
@@ -46,9 +48,11 @@ class Sheet:
         if tmp:
             self.timetable = tmp
         api_logger.info(f"Updated timetable!")
+        print(gc.collect())
 
     def get_metadata(self):
         sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.sheet_id).execute()
+        print(gc.collect())
         return sheet_metadata
 
     def get_values(self, range_):
@@ -60,6 +64,8 @@ class Sheet:
             return result.get('values', "")
         except Exception as e:
             api_logger.error(e)
+        finally:
+            print(gc.collect())
 
     def write(self, value, range_):
         if "Текущая запись!" not in range_:
@@ -77,6 +83,9 @@ class Sheet:
         except Exception as e:
             api_logger.error(e)
             return -1
+
+        finally:
+            print(gc.collect())
 
     def find_places(self, day, time, machine):
         if not self.timetable:
