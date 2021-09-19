@@ -117,15 +117,16 @@ def get_chat_id(username):
 
 
 def user_status(username):
-    try:
-        with lock:
-            ans = cur.execute('''SELECT status FROM users WHERE username=(?)''', (username,))
-        ans = [x for x in ans]
-        if ans:
-            return ans[0][0]
-        return []
-    except Exception as e:
-        print(e)
+    while True:
+        try:
+            with lock:
+                ans = cur.execute('''SELECT status FROM users WHERE username=(?)''', (username,))
+            ans = [x for x in ans]
+            if ans:
+                return ans[0][0]
+            return []
+        except Exception as e:
+            print(e)
 
 
 def delete_request(username):
@@ -204,7 +205,7 @@ def remove_message(username, msg):
         db_logger.error(e)
 
 
-def made_note(username, place, value):
+def make_note(username, place, value):
     db_logger.info(f"[SQL] {username} : {place} : {value}")
     try:
         with lock:

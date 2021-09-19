@@ -1,5 +1,5 @@
 from module import Sheet, auth
-from db import get_requests, add_message, made_note, \
+from db import get_requests, add_message, make_note, \
     note_by_time, note_by_date, get_notes, all_notes, delete_note
 from time import sleep
 from datetime import datetime, time, timedelta, date
@@ -34,10 +34,10 @@ def main():
                 if not sheet.write(req[4], places[-1]["cell"]):
                     add_message(req[0], f"Записал тебя на стрику\n"
                                         f"{req[1]}\n{req[2]}\nМашинка: {place['machine']}")
-                    made_note(req[0], place, req[4])
+                    make_note(req[0], place, req[4])
                     user_weeks.append(number_of_week(place['date']))
 
-        sleep(60)
+        sleep(5)
 
 
 def update_announce():
