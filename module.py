@@ -42,7 +42,9 @@ class Sheet:
         return True
 
     def update_timetable(self):
-        self.timetable = self.get_values("Текущая запись!A3:I100")
+        tmp = self.get_values("Текущая запись!A3:I100")
+        if tmp:
+            self.timetable = tmp
         api_logger.info(f"Updated timetable!")
 
     def get_metadata(self):
@@ -50,11 +52,14 @@ class Sheet:
         return sheet_metadata
 
     def get_values(self, range_):
-        sheet = self.service.spreadsheets()
-        result = sheet.values().get(spreadsheetId=self.sheet_id,
-                                    range=range_,
-                                    ).execute()
-        return result.get('values', "")
+        try:
+            sheet = self.service.spreadsheets()
+            result = sheet.values().get(spreadsheetId=self.sheet_id,
+                                        range=range_,
+                                        ).execute()
+            return result.get('values', "")
+        except Exception as e:
+            api_logger.error(e)
 
     def write(self, value, range_):
         if "Текущая запись!" not in range_:
