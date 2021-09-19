@@ -122,7 +122,7 @@ def any_command(message):
             ans = ""
             if notes:
                 for note in notes:
-                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n'
+                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
                 bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
 
             if not notes:
@@ -143,7 +143,7 @@ def any_command(message):
                 dates = []
                 for note in notes:
                     dates.append(note[1])
-                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n'
+                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
                 ans += "Какую хотите удалить?"
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
                 tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
