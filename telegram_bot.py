@@ -189,21 +189,24 @@ def any_command(message):
     elif "AdminMenu" in status:
         if text == "Запросы на доступ":
             signups = get_signups()
-            ans, users = "", []
-            for info in signups:
-                user, date = info
-                ans += f"{date} - {user}\n"
-                users.append(user)
-            ans += "Одобрить кому-нибудь доступ?"
+            if signups:
+                ans, users = "", []
+                for info in signups:
+                    user, date = info
+                    ans += f"{date} - {user}\n"
+                    users.append(user)
+                ans += "Одобрить кому-нибудь доступ?"
 
-            tmp_buttons = [telebot.types.KeyboardButton(x) for x in users + ["Отмена"]]
-            tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True,
-                                                             one_time_keyboard=True)
-            for but in tmp_buttons:
-                tmp_keyboard.row(but)
+                tmp_buttons = [telebot.types.KeyboardButton(x) for x in users + ["Отмена"]]
+                tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True,
+                                                                 one_time_keyboard=True)
+                for but in tmp_buttons:
+                    tmp_keyboard.row(but)
 
-            bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
-            change_status(user, "AcceptAccess")
+                bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
+                change_status(user, "AcceptAccess")
+            else:
+                bot.send_message(message.chat.id, "Нет запросов", reply_markup=admin_keyboard)
 
         elif text == "Пользователи":
             users = get_users()
