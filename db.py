@@ -110,6 +110,7 @@ def get_chat_id(username):
             with lock:
                 ans = cur.execute('''SELECT chat_id FROM users WHERE username=(?)''', (username,))
             ans = [x for x in ans]
+            db_logger.info(f"get_chat_id: {username}")
             if ans:
                 return list(ans[0])[0]
             return []
@@ -145,7 +146,7 @@ def change_status(username, status):
             cur.execute('''UPDATE users SET status=(?) WHERE username=(?)''', (status, username))
         con.commit()
     except Exception as e:
-        db_logger.error(e)
+        db_logger.error(e + f"args: {username} - {status}")
 
 
 def add_user(chat_id, username):
