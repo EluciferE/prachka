@@ -19,7 +19,7 @@ banner = "Все записи на таблицу будут от моего и�
 
 
 TIMETABLE = "{}\n{}\nМашинка: {}\n{}"
-NOTE = "{}\n{}\n\nМашинка: {}"
+NOTE = "{}\n{}\n{}\nМашинка: {}"
 
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
@@ -158,7 +158,7 @@ def any_command(message):
                 bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
             else:
                 req = req[0]
-                bot.send_message(message.chat.id, TIMETABLE.format(req[1], req[2], req[3], req[4]),
+                bot.send_message(message.chat.id, TIMETABLE.format(req[1].capitalize(), req[2], req[3], req[4]),
                                  reply_markup=stand_menu)
 
         elif text == "Настроить расписание":
@@ -174,7 +174,7 @@ def any_command(message):
                 req = req[0]
                 change_status(user, "DeleteTimetable")
                 bot.send_message(message.chat.id, f"Удалить это расписание?\n" +
-                                 TIMETABLE.format(req[1], req[2], req[3], req[4]), reply_markup=accept_menu)
+                                 TIMETABLE.format(req[1].capitalize(), req[2], req[3], req[4]), reply_markup=accept_menu)
         elif text.lower() == 'admin':
             if user == "EluciferE":
                 change_status(user, "AdminMenu")
@@ -313,7 +313,7 @@ def any_command(message):
             day = tmp.split("/")[0]
             time = tmp.split("/")[1]
             machine = tmp.split("/")[2]
-            bot.send_message(message.chat.id, TIMETABLE.format(day, time, machine, text),
+            bot.send_message(message.chat.id, TIMETABLE.format(day.capitalize(), time, machine, text),
                              reply_markup=accept_menu)
 
     elif "AcceptTimetable" in status:
