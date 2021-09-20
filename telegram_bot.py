@@ -10,12 +10,13 @@ import gc
 
 bot = telebot.TeleBot(token)
 
-banner = "Все записи на таблицу будут от моего имени,"\
-         "поэтому доступ предоставляется не всем.\n\n"\
-         "Боту нужно будет расписание, по которому он будет вас записывать:\n"\
-         "1. День недели\n2. Время\n3. Машинка\n4. Запись (f.e. Иванов, 228г)\n\n"\
-         "Если бот не сможет записать вас на вашу машинку, то попробудет записать на другие."\
-         "Вы всегда можете посмотреть ваши 'Текущие записи' в таблице и 'Удалить' их."\
+banner = "Все записи на таблицу будут от моего имени," \
+         "поэтому доступ предоставляется не всем.\n\n" \
+         "Боту нужно будет расписание, по которому он будет вас записывать:\n" \
+         "1. День недели\n2. Время\n3. Машинка\n4. Запись (f.e. Иванов, 228г)\n\n" \
+         "Если бот не сможет записать вас на вашу машинку, то попробудет записать на другие. " \
+         "Вы всегда можете посмотреть ваши 'Текущие записи' в таблице и Удалить их"
+
 
 TIMETABLE = "День недели: {}\nВремя: {}\nМашинка: {}\nЗапись: {}"
 NOTE = "Дата: {}\nДень недели: {}\nВремя: {}\nМашинка: {}"
@@ -190,9 +191,9 @@ def any_command(message):
             if signups:
                 ans, users = "", []
                 for info in signups:
-                    user, date = info
-                    ans += f"{date} - {user}\n"
-                    users.append(user)
+                    target_user, date = info
+                    ans += f"{date} - {target_user}\n"
+                    users.append(target_user)
                 ans += "Одобрить кому-нибудь доступ?"
 
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in users + ["Отмена"]]
@@ -225,7 +226,7 @@ def any_command(message):
             bot.send_message(message.chat.id, "Вы такой щедрый ^^", reply_markup=admin_keyboard)
         else:
             bot.send_message(user, "Я не смогла найти такого пользователя T_T", reply_markup=admin_keyboard)
-        change_status(text, "AdminMenu")
+        change_status(user, "AdminMenu")
 
     elif "DeleteSingleNote" in status:
         if text == "Подтвердить":
@@ -300,7 +301,7 @@ def any_command(message):
             tmp = get_tmp(user)
             change_tmp(user, tmp + f"{text}/")
             change_status(user, "WriteNote")
-            bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228б)", reply_markup=None)
+            bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228г)", reply_markup=None)
 
     elif "WriteNote" in status:
         if len(text) > 30:
@@ -324,10 +325,10 @@ def any_command(message):
             insert_request(user, request)
             change_status(user, "MainMenu")
             change_tmp(user, "")
-            bot.send_message(message.chat.id, "Запись сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Расписание сохранена", reply_markup=stand_menu)
         else:
             change_status(user, "MainMenu")
-            bot.send_message(message.chat.id, "Запись не сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Расписание не сохранена", reply_markup=stand_menu)
 
 
 Thread(target=send_messages).start()

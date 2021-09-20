@@ -105,15 +105,16 @@ def get_users():
 
 
 def get_chat_id(username):
-    try:
-        with lock:
-            ans = cur.execute('''SELECT chat_id FROM users WHERE username=(?)''', (username,))
-        ans = [x for x in ans]
-        if ans:
-            return list(ans[0])[0]
-        return []
-    except Exception as e:
-        db_logger.error(e)
+    while True:
+        try:
+            with lock:
+                ans = cur.execute('''SELECT chat_id FROM users WHERE username=(?)''', (username,))
+            ans = [x for x in ans]
+            if ans:
+                return list(ans[0])[0]
+            return []
+        except Exception as e:
+            db_logger.error(e)
 
 
 def user_status(username):
