@@ -47,17 +47,17 @@ admin_keyboard.row(admin_but[0], admin_but[1])
 admin_keyboard.row(admin_but[2])
 
 days_buttons = [telebot.types.KeyboardButton(x.capitalize()) for x in days]
-days_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
+days_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 days_menu.row(days_buttons[0], days_buttons[1], days_buttons[2])
 days_menu.row(days_buttons[3], days_buttons[4], days_buttons[5])
 days_menu.row(days_buttons[6])
 
 times_buttons = [telebot.types.KeyboardButton(x) for x in times]
-times_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
+times_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 times_menu.row(times_buttons[0], times_buttons[1])
 times_menu.row(times_buttons[2], times_buttons[3])
 
-wedn_times_menu = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True, one_time_keyboard=True)
+wedn_times_menu = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 wedn_times_menu.row(times_buttons[2], times_buttons[3])
 
 machines_buttons = [telebot.types.KeyboardButton(x) for x in ["1", "2", "3"]]
@@ -74,7 +74,7 @@ stand_menu.row(standard_buttons[4])
 
 accept_buttons = [telebot.types.KeyboardButton(x) for x in ["Подтвердить",
                                                             "Отмена"]]
-accept_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True, one_time_keyboard=True)
+accept_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 accept_menu.row(accept_buttons[0], accept_buttons[1])
 
 
@@ -148,8 +148,7 @@ def any_command(message):
                     ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
                 ans += "Какую хотите удалить?"
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
-                tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True,
-                                                                 one_time_keyboard=True)
+                tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
                 tmp_keyboard.row(tmp_buttons[0], tmp_buttons[1])
                 tmp_keyboard.row(tmp_buttons[2])
                 bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
