@@ -18,8 +18,8 @@ banner = "Все записи на таблицу будут от моего и�
          "Вы всегда можете посмотреть ваши 'Текущие записи' в таблице и Удалить их"
 
 
-TIMETABLE = "День недели: {}\nВремя: {}\nМашинка: {}\nЗапись: {}"
-NOTE = "Дата: {}\nДень недели: {}\nВремя: {}\nМашинка: {}"
+TIMETABLE = "{}\n{}\nМашинка: {}\n{}"
+NOTE = "{}\n{}\n\nМашинка: {}"
 
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
@@ -122,7 +122,7 @@ def any_command(message):
             ans = ""
             if notes:
                 for note in notes:
-                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
+                    ans += NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) + '\n\n'
                 bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
 
             if not notes:
@@ -135,7 +135,7 @@ def any_command(message):
             elif len(notes) == 1:
                 note = notes[0]
                 bot.send_message(message.chat.id,
-                                 f"Ваша запись:\n\n" + NOTE.format(note[1], note[2], note[3], note[4]) +
+                                 f"Ваша запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
                                  "\n\nУдалить?", reply_markup=accept_menu)
                 change_status(user, "DeleteSingleNote")
             else:
