@@ -345,9 +345,9 @@ while True:
     try:
         send_messages_thread = Thread(target=send_messages)
         send_messages_thread.start()
-
-        bot.polling(none_stop=True)
+        
         bot_logger.info("Bot has just started")
+        bot.polling(none_stop=True)
     except Exception as e:
         bot_logger.error(e)
         time.sleep(15)
