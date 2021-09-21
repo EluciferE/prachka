@@ -24,12 +24,20 @@ NOTE = "{}\n{}\n{}\nМашинка: {}"
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
 logging.basicConfig(level=logging.INFO)
-tg_logs = logging.FileHandler('logs/bot.log')
+tg_logs = logging.FileHandler('logs/chat.log')
 tg_logs.setFormatter(logging.Formatter(FORMAT))
 
-tg_logger = logging.getLogger('bot')
+bot_logs = logging.FileHandler('logs/bot.log')
+bot_logs.setFormatter(logging.Formatter(FORMAT))
+
+tg_logger = logging.getLogger('chat')
 tg_logger.addHandler(tg_logs)
 tg_logger.propagate = False
+
+bot_logger = logging.getLogger('bot')
+bot_logger.addHandler(bot_logs)
+bot_logger.propagate = False
+
 
 times = ["8:45 - 10:45", "12:00 - 14:00", "16:00 - 18:00", "20:00 - 22:00"]
 days = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
@@ -331,5 +339,20 @@ def any_command(message):
             bot.send_message(message.chat.id, "Расписание не сохранена", reply_markup=stand_menu)
 
 
-Thread(target=send_messages).start()
-bot.polling()
+send_messages_thread = None
+
+while True:
+    try:
+        send_messages_thread = Thread(target=send_messages)
+        send_messages_thread.start()
+
+        bot.polling(none_stop=True)
+        bot_logger.info("Bot has just started")
+    except Exception as e:
+        bot_logger.error(e)
+        time.sleep(15)
+
+    finally:
+        bot_logger.info("Bot has just stopped")
+        if send_messages_thread:
+            send_messages_thread.stop()
