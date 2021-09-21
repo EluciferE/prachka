@@ -32,7 +32,7 @@ def main():
                     continue
 
                 if not sheet.write(req[4], places[-1]["cell"]):
-                    add_message(req[0], f"Записал тебя на стрику\n"
+                    add_message(req[0], f"Записал тебя на стирку\n"
                                         f"{req[1]}\n{req[2]}\nМашинка: {place['machine']}")
                     make_note(req[0], place, req[4])
                     user_weeks.append(number_of_week(place['date']))
