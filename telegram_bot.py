@@ -4,7 +4,7 @@ import logging
 from db import *
 from threading import Thread
 from time import sleep
-from main import sheet, date_now
+from main import sheet, date_now, datetime
 
 import gc
 
@@ -130,8 +130,14 @@ def any_command(message):
             ans = ""
             if notes:
                 for note in notes:
-                    ans += NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) + '\n\n'
-                bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
+                    now = datetime.strptime(date_now(), "%d.%m.%Y")
+                    note_date = datetime.strptime(note[1], "%d.%m.%Y")
+                    if now <= note_date:
+                        ans += NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) + '\n\n'
+                if ans:
+                    bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
+                else:
+                    bot.send_message(message.chat.id, "В данный момент у вас нет записей", reply_markup=stand_menu)
 
             if not notes:
                 bot.send_message(message.chat.id, "В данный момент у вас нет записей", reply_markup=stand_menu)
@@ -142,16 +148,24 @@ def any_command(message):
                 bot.send_message(message.chat.id, "У вас нет записей", reply_markup=stand_menu)
             elif len(notes) == 1:
                 note = notes[0]
-                bot.send_message(message.chat.id,
-                                 f"Ваша запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
-                                 "\n\nУдалить?", reply_markup=accept_menu)
-                change_status(user, "DeleteSingleNote")
+                now = datetime.strptime(date_now(), "%d.%m.%Y")
+                note_date = datetime.strptime(note[1], "%d.%m.%Y")
+                if now <= note_date:
+                    bot.send_message(message.chat.id,
+                                     f"Ваша запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
+                                     "\n\nУдалить?", reply_markup=accept_menu)
+                    change_status(user, "DeleteSingleNote")
+                else:
+                    bot.send_message(message.chat.id, "У вас нет записей", reply_markup=stand_menu)
             else:
                 ans = "Ваши записи:\n\n"
                 dates = []
                 for note in notes:
-                    dates.append(note[1])
-                    ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
+                    now = datetime.strptime(date_now(), "%d.%m.%Y")
+                    note_date = datetime.strptime(note[1], "%d.%m.%Y")
+                    if now <= note_date:
+                        dates.append(note[1])
+                        ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
                 ans += "Какую хотите удалить?"
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
                 tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
@@ -223,6 +237,8 @@ def any_command(message):
         elif text == "Основное меню":
             bot.send_message(message.chat.id, "Как прикажете", reply_markup=stand_menu)
             change_status(user, "MainMenu")
+        else:
+            bot.send_message(message.chat.id, "Я не поняла....прости...", reply_markup=admin_keyboard)
 
     elif "AcceptAccess" in status:
         if text == "Отмена":

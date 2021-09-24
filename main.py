@@ -117,7 +117,7 @@ def pasted_date(date_):
     now = datetime.today()
     now = now + timedelta(hours=4)
     now = datetime(now.year, now.month, now.day)
-    date_ = datetime.strptime(date_, "%d.%m.%Y")
+    date_ = datetime.strptime(date_, "%d.%m.%Y") + timedelta(days=7)
     return now > date_
 
 
@@ -130,4 +130,4 @@ def number_of_week(date_):
 if __name__ == '__main__':
     update_announce()
     Thread(target=check_announce).start()
-   # main()
+    main()
