@@ -32,7 +32,7 @@ letters = {"1": "D", "2": "F", "3": "H"}
 class Sheet:
     def __init__(self, service):
         self.service = service
-        self.sheet_id = "10B0FULRjxQ-ThMvcDaCJv3VNVL6EmpH6gZyKqzYNir0"
+        self.sheet_id = "1MsHAF96UronEmuXM1TgQrrnGuiNOaiUuHAEwAdpqqis"
         self.timetable = None
 
     @staticmethod

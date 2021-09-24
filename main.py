@@ -48,7 +48,7 @@ def update_announce():
         if not y:
             flag = True
 
-    if not flag:
+    if len(announce_times) == 0:
         datenow = datetime.today()
         day, month, year = datenow.day, datenow.month, datenow.year
         hours, minute = datenow.hour, datenow.minute
@@ -56,6 +56,14 @@ def update_announce():
         announce_times = {
             datetime(year, month, day, an_time[0], an_time[1]): (an_time[0] * 60 + an_time[0]) < (hours * 60 + minute)
             for an_time in an_times}
+    
+    if not (False in announce_times.values()):
+        datenow = datetime.today()
+        next_date = datenow + timedelta(days=1)
+        day, month, year = next_date.day, next_date.month, next_date.year
+        announce_times = {
+                datetime(year, month, day, an_time[0], an_time[1]): False 
+                for an_time in an_times}
 
     notes = all_notes()
     for note in notes:
@@ -76,7 +84,6 @@ def check_announce():
         next_day, next_month, next_year = map(str, [next_date.day, next_date.month, next_date.year])
         next_day = '0' * (2 - len(next_day)) + next_day
         next_month = '0' * (2 - len(next_month)) + next_month
-
         for announce, status in announce_times.items():
             minutes = (announce - now).total_seconds() // 60
             if minutes <= 100 and not status:
@@ -95,7 +102,7 @@ def check_announce():
                         add_message(user, "Менее чем через час у тебя стирка!")
                 announce_times[announce] = True
                 update_announce()
-        sleep(60 * 5)
+        sleep(5 * 60)
 
 
 def date_now():
@@ -108,6 +115,7 @@ def date_now():
 
 def pasted_date(date_):
     now = datetime.today()
+    now = now + timedelta(hours=4)
     now = datetime(now.year, now.month, now.day)
     date_ = datetime.strptime(date_, "%d.%m.%Y")
     return now > date_
@@ -122,4 +130,4 @@ def number_of_week(date_):
 if __name__ == '__main__':
     update_announce()
     Thread(target=check_announce).start()
-    main()
+   # main()
