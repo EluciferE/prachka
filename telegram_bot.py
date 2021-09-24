@@ -349,10 +349,10 @@ def any_command(message):
             insert_request(user, request)
             change_status(user, "MainMenu")
             change_tmp(user, "")
-            bot.send_message(message.chat.id, "Расписание сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Расписание сохранено", reply_markup=stand_menu)
         else:
             change_status(user, "MainMenu")
-            bot.send_message(message.chat.id, "Расписание не сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_menu)
 
 
 send_messages_thread = None
