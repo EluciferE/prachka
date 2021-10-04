@@ -350,7 +350,10 @@ def any_command(message):
             insert_request(user, request)
             change_status(user, "MainMenu")
             change_tmp(user, "")
-            bot.send_message(message.chat.id, "Я сохранила расписаени", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я сохранила расписание", reply_markup=stand_menu)
+            if user != "EluciferE":
+                send_to_admin(f"*{user} обновил расписание с такой записью: {'/'.join(tmp.split('/')[3:])}*")
+            
         else:
             change_status(user, "MainMenu")
             bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_menu)
