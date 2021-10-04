@@ -119,7 +119,7 @@ def any_command(message):
         insert_signup(user, date_now())
         change_status(user, "AskAllow")
         send_to_admin(f"*{user} запрашивает доступ к боту*")
-        bot.send_message(message.chat.id, "Запрос отправлен")
+        bot.send_message(message.chat.id, "Я отправила твой запрос")
 
     elif "AskAllow" in status:
         bot.send_message(message.chat.id, "Вы уже запросили доступ")
@@ -202,7 +202,7 @@ def any_command(message):
                 change_status(user, "AdminMenu")
                 bot.send_message(message.chat.id, "^^ приветик ^^", reply_markup=admin_keyboard)
             else:
-                bot.send_message(message.chat.id, "Тебе сюда нельзя, бяка >:((", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Тебе сюда нельзя, бяка", reply_markup=stand_menu)
 
         else:
             bot.send_message(message.chat.id, "Некорректная команда", reply_markup=stand_menu)
@@ -258,14 +258,14 @@ def any_command(message):
             delete_note(user, note[1])
             sheet.write("", note[6])
             gc.collect()
-            bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я удалила запись! ^^", reply_markup=stand_menu)
         else:
             bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
         change_status(user, "MainMenu")
 
     elif "DeleteMultiNote" in status:
         if text == "Отмена":
-            bot.send_message(message.chat.id, "Ок...", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Хорошо", reply_markup=stand_menu)
             change_status(user, "MainMenu")
         else:
             deleted = False
@@ -278,16 +278,16 @@ def any_command(message):
                     deleted = True
             if deleted:
                 change_status(user, "MainMenu")
-                bot.send_message(message.chat.id, "Запись была удалена", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Я удалила запись! ^^", reply_markup=stand_menu)
             else:
                 change_status(user, "MainMenu")
-                bot.send_message(message.chat.id, "Некоректная дата (или баг, ахах))", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Какая-то странная дата(", reply_markup=stand_menu)
 
     elif "DeleteTimetable" in status:
         change_status(user, "MainMenu")
         if text == "Подтвердить":
             delete_request(user)
-            bot.send_message(message.chat.id, "Расписание удалено!", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я удалила расписание!", reply_markup=stand_menu)
         elif text == "Отмена":
             bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_menu)
 
@@ -349,10 +349,10 @@ def any_command(message):
             insert_request(user, request)
             change_status(user, "MainMenu")
             change_tmp(user, "")
-            bot.send_message(message.chat.id, "Расписание сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я сохранила расписание ^^", reply_markup=stand_menu)
         else:
             change_status(user, "MainMenu")
-            bot.send_message(message.chat.id, "Расписание не сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_menu)
 
 
 send_messages_thread = None
