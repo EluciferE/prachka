@@ -8,7 +8,7 @@ from threading import Thread
 announce_times = {}
 
 an_times = {(4, 45): "8:45 - 10:45", (8, 00): "12:00 - 14:00",
-            (14, 00): "16:00 - 18:00", (16, 00): "20:00 - 22:00", (17, 00): ""}
+            (12, 00): "16:00 - 18:00", (16, 00): "20:00 - 22:00", (17, 00): ""}
 
 service = auth()
 sheet = Sheet(service)
@@ -32,7 +32,7 @@ def main():
                     continue
 
                 if not sheet.write(req[4], places[-1]["cell"]):
-                    add_message(req[0], f"Записал тебя на стирку\n"
+                    add_message(req[0], f"Привет! Записала тебя на стирку ^^\n"
                                         f"{req[1]}\n{req[2]}\nМашинка: {place['machine']}")
                     make_note(req[0], place, req[4])
                     user_weeks.append(number_of_week(place['date']))
@@ -43,11 +43,6 @@ def main():
 def update_announce():
     global announce_times
 
-    flag = False
-    for x, y in announce_times.items():
-        if not y:
-            flag = True
-
     if len(announce_times) == 0:
         datenow = datetime.today()
         day, month, year = datenow.day, datenow.month, datenow.year
@@ -56,14 +51,14 @@ def update_announce():
         announce_times = {
             datetime(year, month, day, an_time[0], an_time[1]): (an_time[0] * 60 + an_time[0]) < (hours * 60 + minute)
             for an_time in an_times}
-    
+
     if not (False in announce_times.values()):
         datenow = datetime.today()
         next_date = datenow + timedelta(days=1)
         day, month, year = next_date.day, next_date.month, next_date.year
         announce_times = {
-                datetime(year, month, day, an_time[0], an_time[1]): False 
-                for an_time in an_times}
+            datetime(year, month, day, an_time[0], an_time[1]): False
+            for an_time in an_times}
 
     notes = all_notes()
     for note in notes:
@@ -86,7 +81,7 @@ def check_announce():
         next_month = '0' * (2 - len(next_month)) + next_month
         for announce, status in announce_times.items():
             minutes = (announce - now).total_seconds() // 60
-            if minutes <= 100 and not status:
+            if minutes <= 15 and not status:
                 if not an_times[(announce.hour, announce.minute)]:
                     if not list(announce_times.values())[0]:
                         continue
@@ -99,7 +94,7 @@ def check_announce():
                                          an_times[(announce.hour, announce.minute)])
                     for user in users:
                         user = str(user[0])
-                        add_message(user, "Менее чем через час у тебя стирка!")
+                        add_message(user, "Через несколько минут стирка!")
                 announce_times[announce] = True
                 update_announce()
         sleep(5 * 60)
