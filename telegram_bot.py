@@ -5,7 +5,7 @@ from db import *
 from threading import Thread
 from time import sleep
 from main import sheet, date_now, datetime
-
+import traceback
 import gc
 
 bot = telebot.TeleBot(token)
@@ -153,7 +153,7 @@ def any_command(message):
                 if now <= note_date:
                     bot.send_message(message.chat.id,
                                      f"Твоя запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
-                                     "\n\nУдалить?", reply_markup=accept_menu)
+                                 "\n\nУдалить?", reply_markup=accept_menu)
                     change_status(user, "DeleteSingleNote")
                 else:
                     bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_menu)
@@ -170,7 +170,8 @@ def any_command(message):
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
                 tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
                 tmp_keyboard.row(tmp_buttons[0], tmp_buttons[1])
-                tmp_keyboard.row(tmp_buttons[2])
+                if len(dates) == 2:
+                    tmp_keyboard.row(tmp_buttons[2])
                 bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
                 change_status(user, "DeleteMultiNote")
 
@@ -355,20 +356,17 @@ def any_command(message):
             bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_menu)
 
 
-send_messages_thread = None
+send_messages_thread = Thread(target=send_messages)
+send_messages_thread.start()
 
 while True:
-    try:
-        send_messages_thread = Thread(target=send_messages)
-        send_messages_thread.start()
-        
+    try:       
         bot_logger.info("Bot has just started")
         bot.polling(none_stop=True)
     except Exception as e:
+        bot_logger.error(traceback.print_exc())
         bot_logger.error(e)
-        time.sleep(15)
+        sleep(15)
 
     finally:
         bot_logger.info("Bot has just stopped")
-        if send_messages_thread:
-            send_messages_thread.stop()
