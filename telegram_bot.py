@@ -119,10 +119,10 @@ def any_command(message):
         insert_signup(user, date_now())
         change_status(user, "AskAllow")
         send_to_admin(f"*{user} запрашивает доступ к боту*")
-        bot.send_message(message.chat.id, "Запрос отправлен")
+        bot.send_message(message.chat.id, "Я отправила запрос ^^")
 
     elif "AskAllow" in status:
-        bot.send_message(message.chat.id, "Вы уже запросили доступ")
+        bot.send_message(message.chat.id, "Ты уже попросил доступ")
 
     elif "MainMenu" in status:
         if text == "Мои записи":
@@ -137,26 +137,26 @@ def any_command(message):
                 if ans:
                     bot.send_message(message.chat.id, ans, reply_markup=stand_menu)
                 else:
-                    bot.send_message(message.chat.id, "В данный момент у вас нет записей", reply_markup=stand_menu)
+                    bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_menu)
 
             if not notes:
-                bot.send_message(message.chat.id, "В данный момент у вас нет записей", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_menu)
 
         elif text == "Удалить запись":
             notes = get_notes(user)
             if not notes:
-                bot.send_message(message.chat.id, "У вас нет записей", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_menu)
             elif len(notes) == 1:
                 note = notes[0]
                 now = datetime.strptime(date_now(), "%d.%m.%Y")
                 note_date = datetime.strptime(note[1], "%d.%m.%Y")
                 if now <= note_date:
                     bot.send_message(message.chat.id,
-                                     f"Ваша запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
+                                     f"Твоя запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
                                      "\n\nУдалить?", reply_markup=accept_menu)
                     change_status(user, "DeleteSingleNote")
                 else:
-                    bot.send_message(message.chat.id, "У вас нет записей", reply_markup=stand_menu)
+                    bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_menu)
             else:
                 ans = "Ваши записи:\n\n"
                 dates = []
@@ -166,7 +166,7 @@ def any_command(message):
                     if now <= note_date:
                         dates.append(note[1])
                         ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
-                ans += "Какую хотите удалить?"
+                ans += "Какую хочешь удалить?"
                 tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
                 tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
                 tmp_keyboard.row(tmp_buttons[0], tmp_buttons[1])
@@ -177,7 +177,7 @@ def any_command(message):
         elif text == "Текущее расписание":
             req = get_request(user)
             if not req:
-                bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "У тебя нет расписания", reply_markup=stand_menu)
             else:
                 req = req[0]
                 bot.send_message(message.chat.id, TIMETABLE.format(req[1].capitalize(), req[2], req[3], req[4]),
@@ -185,13 +185,13 @@ def any_command(message):
 
         elif text == "Настроить расписание":
             change_status(user, "ChooseDay")
-            bot.send_message(message.chat.id, "Выберете день:", reply_markup=days_menu)
+            bot.send_message(message.chat.id, "Выбери день:", reply_markup=days_menu)
 
         elif text == "Удалить расписание":
             req = get_request(user)
 
             if not req:
-                bot.send_message(message.chat.id, "В данный момент у вас нет расписания", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "У тебя нет расписания", reply_markup=stand_menu)
             else:
                 req = req[0]
                 change_status(user, "DeleteTimetable")
@@ -202,7 +202,7 @@ def any_command(message):
                 change_status(user, "AdminMenu")
                 bot.send_message(message.chat.id, "^^ приветик ^^", reply_markup=admin_keyboard)
             else:
-                bot.send_message(message.chat.id, "Тебе сюда нельзя, бяка >:((", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Тебе сюда нельзя, бяка", reply_markup=stand_menu)
 
         else:
             bot.send_message(message.chat.id, "Некорректная команда", reply_markup=stand_menu)
@@ -258,14 +258,14 @@ def any_command(message):
             delete_note(user, note[1])
             sheet.write("", note[6])
             gc.collect()
-            bot.send_message(message.chat.id, "Запись удалена!", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я удалила запись ^^", reply_markup=stand_menu)
         else:
             bot.send_message(message.chat.id, "Запись не удалена", reply_markup=stand_menu)
         change_status(user, "MainMenu")
 
     elif "DeleteMultiNote" in status:
         if text == "Отмена":
-            bot.send_message(message.chat.id, "Ок...", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Как хочешь", reply_markup=stand_menu)
             change_status(user, "MainMenu")
         else:
             deleted = False
@@ -278,16 +278,16 @@ def any_command(message):
                     deleted = True
             if deleted:
                 change_status(user, "MainMenu")
-                bot.send_message(message.chat.id, "Запись была удалена", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Я удалила запись", reply_markup=stand_menu)
             else:
                 change_status(user, "MainMenu")
-                bot.send_message(message.chat.id, "Некоректная дата (или баг, ахах))", reply_markup=stand_menu)
+                bot.send_message(message.chat.id, "Чёт странная дата....", reply_markup=stand_menu)
 
     elif "DeleteTimetable" in status:
         change_status(user, "MainMenu")
         if text == "Подтвердить":
             delete_request(user)
-            bot.send_message(message.chat.id, "Расписание удалено!", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я удалила расписание", reply_markup=stand_menu)
         elif text == "Отмена":
             bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_menu)
 
@@ -299,9 +299,9 @@ def any_command(message):
             change_status(user, f"ChooseTime")
             change_tmp(user, f"{text}/")
             if text == "среда":
-                bot.send_message(message.chat.id, "Выберете время:", reply_markup=wedn_times_menu)
+                bot.send_message(message.chat.id, "Выбери время:", reply_markup=wedn_times_menu)
             else:
-                bot.send_message(message.chat.id, "Выберете время:", reply_markup=times_menu)
+                bot.send_message(message.chat.id, "Выбери время:", reply_markup=times_menu)
 
     elif "ChooseTime" in status:
         day = get_tmp(user).split('/')[0]
@@ -316,7 +316,7 @@ def any_command(message):
             change_status(user, "ChooseMachine")
             tmp = get_tmp(user)
             change_tmp(user, tmp + f'{text}/')
-            bot.send_message(message.chat.id, "Выберете машинку:", reply_markup=machines_menu)
+            bot.send_message(message.chat.id, "Выбери машинку:", reply_markup=machines_menu)
 
     elif "ChooseMachine" in status:
         if text not in ["1", "2", "3"]:
@@ -329,7 +329,7 @@ def any_command(message):
 
     elif "WriteNote" in status:
         if len(text) > 30:
-            bot.send_message(message.chat.id, "Слишком много...")
+            bot.send_message(message.chat.id, "Слишком много... Попробуй ещё раз")
         else:
             tmp = get_tmp(user)
             change_tmp(user, tmp + f"{text}")
@@ -349,10 +349,10 @@ def any_command(message):
             insert_request(user, request)
             change_status(user, "MainMenu")
             change_tmp(user, "")
-            bot.send_message(message.chat.id, "Расписание сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Я сохранила расписаени", reply_markup=stand_menu)
         else:
             change_status(user, "MainMenu")
-            bot.send_message(message.chat.id, "Расписание не сохранена", reply_markup=stand_menu)
+            bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_menu)
 
 
 send_messages_thread = None
