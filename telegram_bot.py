@@ -352,7 +352,8 @@ def any_command(message):
             change_tmp(user, "")
             bot.send_message(message.chat.id, "Я сохранила расписание", reply_markup=stand_menu)
             if user != "EluciferE":
-                send_to_admin(f"*{user} обновил расписание с такой записью: {'/'.join(tmp.split('/')[3:])}*")
+                send_to_admin(f"*{user} обновил расписание\n{tmp.split('/')[0]}\n" +
+                        f"{tmp.split('/')[1]}\nМашинка: {tmp.split('/')[2]}\n{'/'.join(tmp.split('/')[3:])}*")
             
         else:
             change_status(user, "MainMenu")
@@ -373,3 +374,4 @@ while True:
 
     finally:
         bot_logger.info("Bot has just stopped")
+#<3
