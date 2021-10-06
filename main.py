@@ -7,8 +7,8 @@ from threading import Thread
 
 announce_times = {}
 
-an_times = {(4, 45): "8:45 - 10:45", (8, 00): "12:00 - 14:00",
-            (12, 00): "16:00 - 18:00", (16, 00): "20:00 - 22:00", (17, 00): ""}
+an_times = {(4, 30): "8:45 - 10:45", (7, 45): "12:00 - 14:00",
+            (11, 45): "16:00 - 18:00", (15, 45): "20:00 - 22:00", (17, 00): ""}
 
 service = auth()
 sheet = Sheet(service)
@@ -49,7 +49,7 @@ def update_announce():
         hours, minute = datenow.hour, datenow.minute
 
         announce_times = {
-            datetime(year, month, day, an_time[0], an_time[1]): (an_time[0] * 60 + an_time[0]) < (hours * 60 + minute)
+            datetime(year, month, day, an_time[0], an_time[1]): (an_time[0] * 60 + an_time[1]) < (hours * 60 + minute)
             for an_time in an_times}
 
     if not (False in announce_times.values()):
@@ -81,7 +81,7 @@ def check_announce():
         next_month = '0' * (2 - len(next_month)) + next_month
         for announce, status in announce_times.items():
             minutes = (announce - now).total_seconds() // 60
-            if minutes <= 15 and not status:
+            if minutes <= 0 and not status:
                 if not an_times[(announce.hour, announce.minute)]:
                     if not list(announce_times.values())[0]:
                         continue
