@@ -7,3 +7,4 @@ stop.sh
 token.json
 .idea/*
 __pycache__/*
+error_*
