@@ -7,8 +7,8 @@ from threading import Thread
 from announce import Announce
 
 announces = []
-an_times = {(4, 45): "8:45 - 10:45", (8, 00): "12:00 - 14:00",
-            (12, 00): "16:00 - 18:00", (16, 00): "20:00 - 22:00", (17, 00): ""}
+an_times = {(4, 30): "8:45 - 10:45", (7, 45): "12:00 - 14:00",
+            (11, 45): "16:00 - 18:00", (15, 45): "20:00 - 22:00", (16, 00): ""}
 
 for an_time, target_time in an_times.items():
     if not target_time:
@@ -97,4 +97,4 @@ def number_of_week(date_):
 if __name__ == '__main__':
     update_announce()
     Thread(target=check_announce).start()
-    # main()
+    main()
