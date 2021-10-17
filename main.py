@@ -4,11 +4,22 @@ from db import get_requests, add_message, make_note, \
 from time import sleep
 from datetime import datetime, time, timedelta, date
 from threading import Thread
+from announce import Announce
 
-announce_times = {}
-
+announces = []
 an_times = {(4, 45): "8:45 - 10:45", (8, 00): "12:00 - 14:00",
             (12, 00): "16:00 - 18:00", (16, 00): "20:00 - 22:00", (17, 00): ""}
+
+for an_time, target_time in an_times.items():
+    if not target_time:
+        announces.append(Announce("У тебя завтра стирка!", an_time, target_time))
+        continue
+    announces.append(Announce("Через несколько минут стирка!", an_time, target_time))
+
+    new_time = [an_time[0], an_time[1]]
+    new_time[0] += 2
+    announces.append(Announce("Стирка закончилась!", new_time, target_time))
+
 
 service = auth()
 sheet = Sheet(service)
@@ -41,24 +52,10 @@ def main():
 
 
 def update_announce():
-    global announce_times
-
-    if len(announce_times) == 0:
-        datenow = datetime.today()
-        day, month, year = datenow.day, datenow.month, datenow.year
-        hours, minute = datenow.hour, datenow.minute
-
-        announce_times = {
-            datetime(year, month, day, an_time[0], an_time[1]): (an_time[0] * 60 + an_time[0]) < (hours * 60 + minute)
-            for an_time in an_times}
-
-    if not (False in announce_times.values()):
-        datenow = datetime.today()
-        next_date = datenow + timedelta(days=1)
-        day, month, year = next_date.day, next_date.month, next_date.year
-        announce_times = {
-            datetime(year, month, day, an_time[0], an_time[1]): False
-            for an_time in an_times}
+    not_done = [x for x in announces if not x.done]
+    if not not_done:
+        for announce in announces:
+            announce.update_time()
 
     notes = all_notes()
     for note in notes:
@@ -67,36 +64,11 @@ def update_announce():
 
 
 def check_announce():
-    global announce_times
-
     while True:
-        now = datetime.now()
-        now_day, now_month, now_year = map(str, [now.day, now.month, now.year])
-        now_day = '0' * (2 - len(now_day)) + now_day
-        now_month = '0' * (2 - len(now_month)) + now_month
-
-        next_date = now + timedelta(days=1)
-        next_day, next_month, next_year = map(str, [next_date.day, next_date.month, next_date.year])
-        next_day = '0' * (2 - len(next_day)) + next_day
-        next_month = '0' * (2 - len(next_month)) + next_month
-        for announce, status in announce_times.items():
-            minutes = (announce - now).total_seconds() // 60
-            if minutes <= 15 and not status:
-                if not an_times[(announce.hour, announce.minute)]:
-                    if not list(announce_times.values())[0]:
-                        continue
-                    users = note_by_date(f"{next_day}.{next_month}.{next_year}")
-                    for user in users:
-                        user = str(user[0])
-                        add_message(user, "У тебя завтра стирка!")
-                else:
-                    users = note_by_time(f"{now_day}.{now_month}.{now_year}",
-                                         an_times[(announce.hour, announce.minute)])
-                    for user in users:
-                        user = str(user[0])
-                        add_message(user, "Через несколько минут стирка!")
-                announce_times[announce] = True
+        for announce in announces:
+            if announce.try_announce():
                 update_announce()
+        print(*announces, sep="\n")
         sleep(5 * 60)
 
 
@@ -125,4 +97,4 @@ def number_of_week(date_):
 if __name__ == '__main__':
     update_announce()
     Thread(target=check_announce).start()
-    main()
+    # main()
