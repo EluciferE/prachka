@@ -24,7 +24,6 @@ class Announce:
                 for user in users:
                     user = str(user[0])
                     add_message(user, self.message)
-                    print(f"Предупредил {user}, {self}")
                 self.done = True
         else:
             next_date = now + timedelta(days=1)
@@ -34,7 +33,7 @@ class Announce:
 
             minutes = (self.announce_time - now).total_seconds() // 60
 
-            if minutes <= 15 and not self.done:
+            if minutes <= 0 and not self.done:
                 users = note_by_date(f"{next_day}.{next_month}.{next_year}")
                 for user in users:
                     user = str(user[0])
