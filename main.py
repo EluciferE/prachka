@@ -68,7 +68,6 @@ def check_announce():
         for announce in announces:
             if announce.try_announce():
                 update_announce()
-        print(*announces, sep="\n")
         sleep(5 * 60)
 
 

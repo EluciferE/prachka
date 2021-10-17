@@ -60,4 +60,4 @@ class Announce:
         target = self.target_time
         if not self.target_time:
             target = "anytime"
-        return f"{self.__class__.__name__}({self.message}, {self.announce_time}, {target})"
+        return f"{self.__class__.__name__}(done: {self.done}, {self.message}, {self.announce_time}, {target})"
