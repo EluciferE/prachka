@@ -19,7 +19,7 @@ class Announce:
 
         if self.target_time:
             minutes = (self.announce_time - now).total_seconds() // 60
-            if minutes <= 15 and not self.done:
+            if minutes <= 0 and not self.done:
                 users = note_by_time(f"{now_day}.{now_month}.{now_year}", self.target_time)
                 for user in users:
                     user = str(user[0])
