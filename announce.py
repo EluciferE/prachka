@@ -7,9 +7,9 @@ class Announce:
         self.message = message
         if len(announce_time) != 2:
             raise ValueError(f"Wrong announce time. Got: {announce_time}")
-        self.announce_time = self.create_time(announce_time)
         self.target_time = target_time
         self.done = False
+        self.announce_time = self.create_time(announce_time)
 
     def try_announce(self) -> bool:
         now = datetime.now()
@@ -24,6 +24,7 @@ class Announce:
                 for user in users:
                     user = str(user[0])
                     add_message(user, self.message)
+                    print(f"Предупредил {user}, {self}")
                 self.done = True
         else:
             next_date = now + timedelta(days=1)
@@ -53,7 +54,7 @@ class Announce:
 
         if (announce_time[0] * 60 + announce_time[0]) < (hours * 60 + minute):
             self.done = True
-
+        
         return datetime(year, month, day, announce_time[0], announce_time[1])
 
     def __repr__(self):
