@@ -17,14 +17,13 @@ banner = "Все записи на таблицу будут от моего и�
          "Если бот не сможет записать вас на вашу машинку, то попробудет записать на другие. " \
          "Вы всегда можете посмотреть ваши 'Текущие записи' в таблице и Удалить их"
 
-
 TIMETABLE = "{}\n{}\nМашинка: {}\n{}"
 NOTE = "{}\n{}\n{}\nМашинка: {}"
 
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
 logging.basicConfig(level=logging.INFO)
-tg_logs = logging.FileHandler('logs/chat.log')
+tg_logs = logging.FileHandler('logs/chat.log', encoding='utf8')
 tg_logs.setFormatter(logging.Formatter(FORMAT))
 
 bot_logs = logging.FileHandler('logs/bot.log')
@@ -38,9 +37,8 @@ bot_logger = logging.getLogger('bot')
 bot_logger.addHandler(bot_logs)
 bot_logger.propagate = False
 
-
 times = ["8:45 - 10:45", "12:00 - 14:00", "16:00 - 18:00", "20:00 - 22:00"]
-days = ["понедельник", "вторник", "среда", "четверг", "пятница", "суббота", "воскресенье"]
+days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
 
 # BUTTONS/MENUS
 first_menu = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
@@ -52,23 +50,29 @@ admin_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=
 admin_keyboard.row(admin_but[0], admin_but[1])
 admin_keyboard.row(admin_but[2])
 
-days_buttons = [telebot.types.KeyboardButton(x.capitalize()) for x in days]
+days_buttons = [telebot.types.KeyboardButton(x) for x in days]
 days_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 days_menu.row(days_buttons[0], days_buttons[1], days_buttons[2])
 days_menu.row(days_buttons[3], days_buttons[4], days_buttons[5])
-days_menu.row(days_buttons[6])
+days_menu.row(days_buttons[6], telebot.types.KeyboardButton("⬅️ Назад"))
 
 times_buttons = [telebot.types.KeyboardButton(x) for x in times]
 times_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 times_menu.row(times_buttons[0], times_buttons[1])
 times_menu.row(times_buttons[2], times_buttons[3])
+times_menu.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
 wedn_times_menu = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 wedn_times_menu.row(times_buttons[2], times_buttons[3])
+wedn_times_menu.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
-machines_buttons = [telebot.types.KeyboardButton(x) for x in ["1", "2", "3"]]
-machines_menu = telebot.types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True, one_time_keyboard=True)
+machines_buttons = [telebot.types.KeyboardButton(x) for x in ["1", "2", "3", "⬅️ Назад"]]
+machines_menu = telebot.types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
 machines_menu.row(machines_buttons[0], machines_buttons[1], machines_buttons[2])
+machines_menu.row(telebot.types.KeyboardButton("⬅️ Назад"))
+
+write_note_menu = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+write_note_menu.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
 standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Текущее расписание", "Мои записи",
                                                               "Настроить расписание", "Удалить запись",
@@ -82,6 +86,10 @@ accept_buttons = [telebot.types.KeyboardButton(x) for x in ["Подтверди�
                                                             "Отмена"]]
 accept_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 accept_menu.row(accept_buttons[0], accept_buttons[1])
+
+accept_timetable_menu = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+accept_timetable_menu.row(accept_buttons[0], accept_buttons[1])
+accept_timetable_menu.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
 
 def send_to_admin(msg):
@@ -107,6 +115,7 @@ def any_command(message):
     # LOGS
     user = message.from_user.username
     text = message.text
+
     tg_logger.info(f"[GOT] {user}: {text}")
 
     status = user_status(user)
@@ -152,8 +161,9 @@ def any_command(message):
                 note_date = datetime.strptime(note[1], "%d.%m.%Y")
                 if now <= note_date:
                     bot.send_message(message.chat.id,
-                                     f"Твоя запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3], note[4]) +
-                                 "\n\nУдалить?", reply_markup=accept_menu)
+                                     f"Твоя запись:\n\n" + NOTE.format(note[1], note[2].capitalize(), note[3],
+                                                                       note[4]) +
+                                     "\n\nУдалить?", reply_markup=accept_menu)
                     change_status(user, "DeleteSingleNote")
                 else:
                     bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_menu)
@@ -197,7 +207,8 @@ def any_command(message):
                 req = req[0]
                 change_status(user, "DeleteTimetable")
                 bot.send_message(message.chat.id, f"Удалить это расписание?\n" +
-                                 TIMETABLE.format(req[1].capitalize(), req[2], req[3], req[4]), reply_markup=accept_menu)
+                                 TIMETABLE.format(req[1].capitalize(), req[2], req[3], req[4]),
+                                 reply_markup=accept_menu)
         elif text.lower() == 'admin':
             if user == "EluciferE":
                 change_status(user, "AdminMenu")
@@ -293,10 +304,15 @@ def any_command(message):
             bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_menu)
 
     elif "ChooseDay" in status:
-        text = text.lower()
+        if "Назад" in text:
+            change_status(user, "MainMenu")
+            bot.send_message(message.chat.id, "^^", reply_markup=stand_menu)
+            return
+
         if text not in days:
             bot.send_message(message.chat.id, "Некорректный день", reply_markup=days_menu)
         else:
+            text = text.lower()
             change_status(user, f"ChooseTime")
             change_tmp(user, f"{text}/")
             if text == "среда":
@@ -306,6 +322,12 @@ def any_command(message):
 
     elif "ChooseTime" in status:
         day = get_tmp(user).split('/')[0]
+
+        if "Назад" in text:
+            change_tmp(user, "")
+            change_status(user, "ChooseDay")
+            bot.send_message(message.chat.id, "Выбери день", reply_markup=days_menu)
+            return
 
         if day == "среда" and text not in times[2:]:
             bot.send_message(message.chat.id, "Некорректное время", reply_markup=wedn_times_menu)
@@ -320,16 +342,35 @@ def any_command(message):
             bot.send_message(message.chat.id, "Выбери машинку:", reply_markup=machines_menu)
 
     elif "ChooseMachine" in status:
+        tmp = get_tmp(user)
+
+        if "Назад" in text:
+            day = get_tmp(user).split('/')[0]
+            change_tmp(user, day + "/")
+            change_status(user, "ChooseTime")
+            if "среда" in day.lower():
+                bot.send_message(message.chat.id, "Выбери время", reply_markup=wedn_times_menu)
+            else:
+                bot.send_message(message.chat.id, "Выбери время", reply_markup=times_menu)
+
+            return
+
         if text not in ["1", "2", "3"]:
             bot.send_message(message.chat.id, "Некорректный номер машинки", reply_markup=machines_menu)
         else:
-            tmp = get_tmp(user)
             change_tmp(user, tmp + f"{text}/")
             change_status(user, "WriteNote")
-            bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228г)", reply_markup=None)
+            bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228г)", reply_markup=write_note_menu)
 
     elif "WriteNote" in status:
-        if len(text) > 30:
+        if "Назад" in text:
+            tmp = get_tmp(user).split("/")
+            tmp = '/'.join(tmp[:-2]) + "/"
+            change_tmp(user, tmp)
+            change_status(user, "ChooseMachine")
+            bot.send_message(message.chat.id, "Выбери машинку", reply_markup=machines_menu)
+
+        elif len(text) > 30:
             bot.send_message(message.chat.id, "Слишком много... Попробуй ещё раз")
         else:
             tmp = get_tmp(user)
@@ -339,10 +380,18 @@ def any_command(message):
             time = tmp.split("/")[1]
             machine = tmp.split("/")[2]
             bot.send_message(message.chat.id, TIMETABLE.format(day.capitalize(), time, machine, text),
-                             reply_markup=accept_menu)
+                             reply_markup=accept_timetable_menu)
 
     elif "AcceptTimetable" in status:
-        if text == "Подтвердить":
+        if "Назад" in text:
+            tmp = get_tmp(user).split("/")
+            tmp = '/'.join(tmp[:-2]) + "/"
+            change_status(user, tmp)
+            change_status(user, "WriteNote")
+            bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228г)",
+                             reply_markup=write_note_menu)
+
+        elif text == "Подтвердить":
             delete_request(user)
             tmp = get_tmp(user)
             request = {"day": tmp.split("/")[0], "time": tmp.split("/")[1],
@@ -353,8 +402,8 @@ def any_command(message):
             bot.send_message(message.chat.id, "Я сохранила расписание", reply_markup=stand_menu)
             if user != "EluciferE":
                 send_to_admin(f"*{user} обновил расписание\n{tmp.split('/')[0]}\n" +
-                        f"{tmp.split('/')[1]}\nМашинка: {tmp.split('/')[2]}\n{'/'.join(tmp.split('/')[3:])}*")
-            
+                              f"{tmp.split('/')[1]}\nМашинка: {tmp.split('/')[2]}\n{'/'.join(tmp.split('/')[3:])}*")
+
         else:
             change_status(user, "MainMenu")
             bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_menu)
@@ -364,7 +413,7 @@ send_messages_thread = Thread(target=send_messages)
 send_messages_thread.start()
 
 while True:
-    try:       
+    try:
         bot_logger.info("Bot has just started")
         bot.polling(none_stop=True)
     except Exception as e:
@@ -374,4 +423,4 @@ while True:
 
     finally:
         bot_logger.info("Bot has just stopped")
-#<3
+# <3
