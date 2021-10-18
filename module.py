@@ -119,7 +119,7 @@ class Sheet:
             if not row:
                 continue
 
-            if row[1] in days:
+            if len(row) > 1 and row[1] in days:
                 cur_day = row[1]
                 cur_date = row[0]
             if cur_day == day and len(row) > 2 and time == row[2]:
