@@ -1,9 +1,12 @@
 from datetime import datetime, time, timedelta, date
-from db import note_by_time, add_message, note_by_date
+from telegram_bot import TgBot
+from db import DataBase
 
 
 class Announce:
-    def __init__(self, message, announce_time, target_time):
+    def __init__(self, db: DataBase, tg_bot: TgBot, message, announce_time, target_time):
+        self.db = db
+        self.tg_bot = tg_bot
         self.message = message
         if len(announce_time) != 2:
             raise ValueError(f"Wrong announce time. Got: {announce_time}")
@@ -20,10 +23,10 @@ class Announce:
         if self.target_time:
             minutes = (self.announce_time - now).total_seconds() // 60
             if minutes <= 0 and not self.done:
-                users = note_by_time(f"{now_day}.{now_month}.{now_year}", self.target_time)
+                users = self.db.note_by_time(f"{now_day}.{now_month}.{now_year}", self.target_time)
                 for user in users:
                     user = str(user[0])
-                    add_message(user, self.message)
+                    self.tg_bot.send_to_user(user, self.message)
                 self.done = True
         else:
             next_date = now + timedelta(days=1)
@@ -34,10 +37,10 @@ class Announce:
             minutes = (self.announce_time - now).total_seconds() // 60
 
             if minutes <= 0 and not self.done:
-                users = note_by_date(f"{next_day}.{next_month}.{next_year}")
+                users = self.db.note_by_date(f"{next_day}.{next_month}.{next_year}")
                 for user in users:
                     user = str(user[0])
-                    add_message(user, self.message)
+                    self.tg_bot.send_to_user(user, self.message)
             self.done = True
 
         return self.done
@@ -53,7 +56,7 @@ class Announce:
 
         if (announce_time[0] * 60 + announce_time[0]) < (hours * 60 + minute):
             self.done = True
-        
+
         return datetime(year, month, day, announce_time[0], announce_time[1])
 
     def __repr__(self):
