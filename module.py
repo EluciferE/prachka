@@ -44,10 +44,13 @@ class Sheet:
         return True
 
     def update_timetable(self):
-        tmp = self.get_values("Текущая запись!A3:I100")
-        if tmp:
-            self.timetable = tmp
-        gc.collect()
+        try:
+            tmp = self.get_values("Текущая запись!A3:I100")
+            if tmp:
+                self.timetable = tmp
+            gc.collect()
+        except Exception as e:
+            api_logger.error(e)
 
     def get_metadata(self):
         sheet_metadata = self.service.spreadsheets().get(spreadsheetId=self.sheet_id).execute()
@@ -56,6 +59,8 @@ class Sheet:
 
     def get_values(self, range_):
         try:
+            if "Текущая запись!" not in range_:
+                range_ = "Текущая запись!" + range_
             sheet = self.service.spreadsheets()
             result = sheet.values().get(spreadsheetId=self.sheet_id,
                                         range=range_,
@@ -117,7 +122,7 @@ class Sheet:
             if row[1] in days:
                 cur_day = row[1]
                 cur_date = row[0]
-            if cur_day == day and time == row[2]:
+            if cur_day == day and len(row) > 2 and time == row[2]:
                 try:
                     if len(row) <= machines[machine] or not row[machines[machine]]:
                         cell = f"{letters[machine]}{line}"
