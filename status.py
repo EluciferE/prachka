@@ -2,6 +2,7 @@ class STATUS:
     ADMIN_MENU = "AdminMenu"
     BAN_SOMEONE = "BanSomeone"
     ACCEPT_ACCESS = "AcceptAccess"
+    UNBAN_SOMEONE = "UnbanSomeone"
 
     NEW = "New"
     ASK_ALLOW = "AskAllow"

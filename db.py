@@ -251,3 +251,11 @@ class DataBase:
                 return [x for x in ans]
         except Exception as e:
             self.db_logger.error(e)
+
+    def banned_users(self):
+        try:
+            with self.lock:
+                ans = self.cur.execute('''SELECT username FROM users where status="Banned"''')
+                return [x for x in ans]
+        except Exception as e:
+            self.db_logger.error(e)

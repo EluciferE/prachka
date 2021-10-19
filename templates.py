@@ -18,11 +18,12 @@ days = ["Понедельник", "Вторник", "Среда", "Четвер�
 first_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 first_keyboard.row(telebot.types.KeyboardButton("Запросить доступ к боту"))
 
-admin_but = [telebot.types.KeyboardButton(x) for x in ['Запросы на доступ', 'Пользователи', 'Забанить',
+admin_but = [telebot.types.KeyboardButton(x) for x in ['Запросы на доступ', 'Пользователи', 'Забанить', 'Разбанить',
                                                        'Основное меню']]
 admin_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 admin_keyboard.row(admin_but[0], admin_but[1])
 admin_keyboard.row(admin_but[2], admin_but[3])
+admin_keyboard.row(admin_but[4])
 
 days_buttons = [telebot.types.KeyboardButton(x) for x in days]
 days_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)

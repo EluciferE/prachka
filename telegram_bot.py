@@ -105,6 +105,9 @@ class TgBot:
                 elif text == "Забанить":
                     self.ban_someone(message)
 
+                elif text == "Разбанить":
+                    self.unban_someone(message)
+
                 else:
                     self.bot.send_message(message.chat.id, "Я не поняла....прости...", reply_markup=admin_keyboard)
 
@@ -124,6 +127,9 @@ class TgBot:
 
             elif status == STATUS.BAN_SOMEONE:
                 self.try_to_ban(message)
+
+            elif status == STATUS.UNBAN_SOMEONE:
+                self.try_to_unban(message)
 
             elif status == STATUS.DELETE_NOTE:
                 self.db.change_status(user, STATUS.MAIN_MENU)
@@ -148,6 +154,7 @@ class TgBot:
                 if text == "Подтвердить":
                     self.db.delete_request(user)
                     self.bot.send_message(message.chat.id, "Я удалила расписание", reply_markup=stand_keyboard)
+                    self.send_to_admin(f"*{user} удалил расписание*")
                 elif text == "Отмена":
                     self.bot.send_message(message.chat.id, "Расписание не удалено", reply_markup=stand_keyboard)
 
@@ -470,14 +477,20 @@ class TgBot:
         ans = '\n'.join(users)
         ans += "\nКого хочешь забанить?"
 
-        tmp_buttons = [telebot.types.KeyboardButton(x) for x in users + ["Отмена"]]
-        tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True,
-                                                         one_time_keyboard=True)
-        for but in tmp_buttons:
-            tmp_keyboard.row(but)
-
+        tmp_keyboard = self.create_keyboard(users + ["Отмена"], 2)
         self.bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
         self.db.change_status(user, STATUS.BAN_SOMEONE)
+
+    def unban_someone(self, message):
+        user = message.from_user.username
+        users = self.db.banned_users()
+        users = [list(x)[0] for x in users]
+        ans = '\n'.join(users)
+        ans += "\nКого хочешь разбанить?"
+
+        tmp_keyboard = self.create_keyboard(users + ["Отмена"], 2)
+        self.bot.send_message(message.chat.id, ans, reply_markup=tmp_keyboard)
+        self.db.change_status(user, STATUS.UNBAN_SOMEONE)
 
     def try_to_ban(self, message):
         text = message.text
@@ -512,6 +525,29 @@ class TgBot:
             for note in notes:
                 self.sheet.write("", note[6])
             self.db.delete_all_notes(text)
+
+    def try_to_unban(self, message):
+        text = message.text
+        user = message.from_user.username
+
+        self.db.change_status(user, STATUS.ADMIN_MENU)
+
+        if "Отмена" in text:
+            self.bot.send_message(message.chat.id, "^^", reply_markup=admin_keyboard)
+
+        else:
+            users = self.db.banned_users()
+            users = [x[0] for x in users]
+            if text not in users:
+                self.bot.send_message(message.chat.id, "Я не смогла найти такого пользователя T_T",
+                                      reply_markup=admin_keyboard)
+                return
+
+            self.db.change_status(text, STATUS.MAIN_MENU)
+            self.db.change_tmp(text, "")
+
+            self.bot.send_message(message.chat.id, f"Разбанила {text}", reply_markup=admin_keyboard)
+            self.bot.send_message(self.db.get_chat_id(text), f"Unbanned", reply_markup=stand_keyboard)
 
     def send_to_user(self, username, message):
         chat_id = self.db.get_chat_id(username)
