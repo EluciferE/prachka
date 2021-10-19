@@ -49,7 +49,7 @@ machines_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
 back_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 back_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
-standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Текущее расписание", "Мои записи",
+standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Моё расписание", "Мои записи",
                                                               "Настроить расписание", "Удалить запись",
                                                               "Удалить расписание"]]
 stand_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
