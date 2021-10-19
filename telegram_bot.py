@@ -524,7 +524,7 @@ class TgBot:
             notes = self.db.get_notes(text)
             for note in notes:
                 self.sheet.write("", note[6])
-            self.db.delete_all_notes(text)
+                self.db.delete_all_notes(text)
 
     def try_to_unban(self, message):
         text = message.text
