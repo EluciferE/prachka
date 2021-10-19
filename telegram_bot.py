@@ -65,7 +65,7 @@ class TgBot:
                 elif text == "Удалить запись":
                     self.delete_notes(message)
 
-                elif text == "Текущее расписание":
+                elif text == "Моё расписание":
                     self.my_timetable(message)
 
                 elif text == "Настроить расписание":
