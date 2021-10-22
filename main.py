@@ -47,7 +47,7 @@ def update_announce(db):
     notes = db.all_notes()
     for note in notes:
         if pasted_date(note[1]):
-            delete_note(note[0], note[1])
+            db.delete_note_by_day(note[0], note[1])
 
 
 def check_announce(db):

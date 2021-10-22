@@ -417,6 +417,11 @@ class TgBot:
                 dates.append(note[1])
                 ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
         ans += "Какую хочешь удалить?"
+        
+        if not dates:
+            self.bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_keyboard)
+            return
+
         tmp_buttons = [telebot.types.KeyboardButton(x) for x in dates + ["Отмена"]]
         tmp_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
         for x in tmp_buttons:
