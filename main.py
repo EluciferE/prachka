@@ -2,7 +2,7 @@ from module import Sheet, auth
 from db import DataBase
 from telegram_bot import TgBot
 from announce import Announce
-from config import token
+from config import token, sheet_id
 
 from time import sleep
 from datetime import datetime, time, timedelta, date
@@ -16,10 +16,11 @@ an_times = {(4, 35): "8:45 - 10:45", (7, 50): "12:00 - 14:00",
 
 def main():
     service = auth()
-    sheet = Sheet(service)
+    sheet = Sheet(service, sheet_id)
 
     db = DataBase()
     tg_bot = TgBot(token, sheet, db)
+
     Thread(target=tg_bot.start_bot).start()
     Thread(target=check_collisions, args=(db, sheet, tg_bot,)).start()
     Thread(target=check_updates, args=(db, sheet, tg_bot,)).start()
@@ -31,6 +32,7 @@ def main():
         announces.append(Announce(db, tg_bot, "Через несколько минут стирка!", an_time, target_time))
 
         new_time = [an_time[0], an_time[1]]
+        # Когда стирка закончилась
         new_time[0] += 2
         announces.append(Announce(db, tg_bot, "Стирка закончилась!", new_time, target_time))
 
@@ -39,6 +41,7 @@ def main():
 
 
 def update_announce(db):
+    global announces
     not_done = [x for x in announces if not x.done]
     if not not_done:
         for announce in announces:
@@ -51,11 +54,13 @@ def update_announce(db):
 
 
 def check_announce(db):
+    global announces
     while True:
         for announce in announces:
             if announce.try_announce():
                 update_announce(db)
-        sleep(2 * 60)
+
+        sleep(60)
 
 
 def check_collisions(db, sheet, tg_bot):
