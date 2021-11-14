@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta, date
 from telegram_bot import TgBot
 from db import DataBase
+from time import sleep
 
 
 class Announce:
@@ -21,27 +22,31 @@ class Announce:
         now_month = '0' * (2 - len(now_month)) + now_month
 
         if self.target_time:
-            minutes = (self.announce_time - now).total_seconds() // 60
-            if minutes <= 0 and not self.done:
+            seconds = (self.announce_time - now).total_seconds()
+            if seconds <= 0 and not self.done:
                 users = self.db.note_by_time(f"{now_day}.{now_month}.{now_year}", self.target_time)
                 for user in users:
                     user = str(user[0])
+                    while not self.tg_bot.working:
+                        sleep(5)
                     self.tg_bot.send_to_user(user, self.message)
                 self.done = True
-        else:
+        else:  # ANNOUNCE FOR THE NEXT DAY
             next_date = now + timedelta(days=1)
             next_day, next_month, next_year = map(str, [next_date.day, next_date.month, next_date.year])
             next_day = '0' * (2 - len(next_day)) + next_day
             next_month = '0' * (2 - len(next_month)) + next_month
 
-            minutes = (self.announce_time - now).total_seconds() // 60
+            seconds = (self.announce_time - now).total_seconds()
 
-            if minutes <= 0 and not self.done:
+            if seconds <= 0 and not self.done:
                 users = self.db.note_by_date(f"{next_day}.{next_month}.{next_year}")
                 for user in users:
                     user = str(user[0])
+                    while not self.tg_bot.working:
+                        sleep(5)
                     self.tg_bot.send_to_user(user, self.message)
-            self.done = True
+                self.done = True
 
         return self.done
 
