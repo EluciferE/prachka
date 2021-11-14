@@ -30,9 +30,9 @@ letters = {"1": "D", "2": "F", "3": "H"}
 
 
 class Sheet:
-    def __init__(self, service):
+    def __init__(self, service, sheet_id):
         self.service = service
-        self.sheet_id = "1MsHAF96UronEmuXM1TgQrrnGuiNOaiUuHAEwAdpqqis"
+        self.sheet_id = sheet_id
         self.timetable = None
 
     @staticmethod
@@ -81,7 +81,7 @@ class Sheet:
                 spreadsheetId=self.sheet_id, range=range_,
                 valueInputOption="RAW", body=body).execute()
             api_logger.info(f"[WRITE] {range_} -> {value}")
-            self.timetable = self.get_values("Текущая запись!A3:I100")
+            self.timetable = self.get_values("Текущая запись!A3:I80")
             return 0
 
         except Exception as e:
@@ -124,7 +124,7 @@ class Sheet:
                 cur_date = row[0]
             if cur_day == day and len(row) > 2 and time == row[2]:
                 try:
-                    if len(row) <= machines[machine] or not row[machines[machine]]:
+                    if len(row) <= machines[machine] or not row[machines[machine]].strip():
                         cell = f"{letters[machine]}{line}"
                         place = {"date": cur_date, "day": cur_day,
                                  "time": time, "machine": machine, "cell": cell}
