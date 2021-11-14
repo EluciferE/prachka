@@ -29,6 +29,8 @@ class TgBot:
         self.bot_logger.addHandler(bot_logs)
         self.bot_logger.propagate = False
 
+        self.working = True
+
         @self.bot.message_handler(func=lambda message: True)
         def any_command(message):
             user = message.from_user.username
@@ -333,9 +335,11 @@ class TgBot:
             try:
                 self.bot_logger.info("Bot has just started")
                 self.bot.polling(none_stop=True)
+                self.working = True
             except Exception as e:
                 self.bot_logger.error(e)
                 self.bot_logger.info("Bot has just stopped")
+                self.working = False
                 sleep(15)
 
     def send_to_admin(self, msg):
