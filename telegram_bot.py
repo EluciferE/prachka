@@ -48,9 +48,11 @@ class TgBot:
                 self.bot.send_message(message.chat.id, banner, reply_markup=first_keyboard)
                 status = self.db.user_status(user)
 
-            if status == STATUS.NEW and text == "Запросить доступ к боту":
+            if status == STATUS.NEW and text == "Я хочу пользоваться ботом":
                 self.new_user(message)
                 return
+            elif status == STATUS.NEW:
+                self.bot.send_message(message.chat.id, "Сначала нажми на кнопку ⬇️", reply_markup=first_keyboard)
 
             elif status == STATUS.ASK_ALLOW:
                 self.bot.send_message(message.chat.id, "Ты уже попросил доступ")
