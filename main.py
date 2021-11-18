@@ -60,7 +60,7 @@ def check_announce(db):
             if announce.try_announce():
                 update_announce(db)
 
-        sleep(60)
+        sleep(10)
 
 
 def check_collisions(db, sheet, tg_bot):
@@ -101,7 +101,7 @@ def check_updates(db, sheet, tg_bot):
                     db.make_note(req[0], place, req[4])
                     user_weeks.append(number_of_week(place['date']))
 
-        sleep(30)
+        sleep(10)
 
 
 if __name__ == '__main__':
