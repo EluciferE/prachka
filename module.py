@@ -45,7 +45,7 @@ class Sheet:
 
     def update_timetable(self):
         try:
-            tmp = self.get_values("Текущая запись!A3:I100")
+            tmp = self.get_values("Текущая запись!A3:I80")
             if tmp:
                 self.timetable = tmp
             gc.collect()
@@ -92,58 +92,63 @@ class Sheet:
             gc.collect()
 
     def find_places(self, day, time, machine):
-        if not self.timetable:
-            self.timetable = self.get_values("Текущая запись!A3:I100")
+        try:
+            if not self.timetable:
+                self.timetable = self.get_values("Текущая запись!A3:I80")
 
-        day = day.lower()
+            day = day.lower()
 
-        if type(machine) == int:
-            machine = str(machine)
+            if type(machine) == int:
+                machine = str(machine)
 
-        if day not in days:
-            raise ValueError(f"Wrong day\n\tGot: {day}\n\tExpected: {days}")
-        if time not in times:
-            raise ValueError(f"Wrong time\n\tGot: {time}\n\tExpected: {times}")
-        if machine not in ["1", "2", "3"]:
-            raise ValueError(f"Wrong machine\n\tGot: {machine}\n\tExpected: 1, 2, 3")
+            if day not in days:
+                raise ValueError(f"Wrong day\n\tGot: {day}\n\tExpected: {days}")
+            if time not in times:
+                raise ValueError(f"Wrong time\n\tGot: {time}\n\tExpected: {times}")
+            if machine not in ["1", "2", "3"]:
+                raise ValueError(f"Wrong machine\n\tGot: {machine}\n\tExpected: 1, 2, 3")
 
-        good_places = []
+            good_places = []
 
-        cur_day = None
-        cur_date = None
+            cur_day = None
+            cur_date = None
 
-        line = 2
+            line = 2
 
-        for row in self.timetable:
-            line += 1
-            if not row:
-                continue
+            for row in self.timetable:
+                line += 1
+                if not row:
+                    continue
 
-            if len(row) > 1 and row[1] in days:
-                cur_day = row[1]
-                cur_date = row[0]
-            if cur_day == day and len(row) > 2 and time == row[2]:
-                try:
-                    if len(row) <= machines[machine] or not row[machines[machine]].strip():
-                        cell = f"{letters[machine]}{line}"
-                        place = {"date": cur_date, "day": cur_day,
-                                 "time": time, "machine": machine, "cell": cell}
-                        if self._valid_date(cur_date):
-                            good_places.append(place)
-                    else:
-                        # ГОВНОКОД, ИДИ НАХУЙ
-                        for machine_try in ["1", "2", "3"]:
-                            if len(row) <= machines[machine_try] or not row[machines[machine_try]]:
-                                cell = f"{letters[machine_try]}{line}"
-                                place = {"date": cur_date, "day": cur_day,
-                                         "time": time, "machine": machine_try, "cell": cell}
-                                if self._valid_date(cur_date):
-                                    good_places.append(place)
+                if len(row) > 1 and row[1] in days:
+                    cur_day = row[1]
+                    cur_date = row[0]
+                if cur_day == day and len(row) > 2 and time == row[2]:
+                    try:
+                        if len(row) <= machines[machine] or not row[machines[machine]].strip():
+                            cell = f"{letters[machine]}{line}"
+                            place = {"date": cur_date, "day": cur_day,
+                                     "time": time, "machine": machine, "cell": cell}
+                            if self._valid_date(cur_date):
+                                good_places.append(place)
+                        else:
+                            # ГОВНОКОД, ИДИ НАХУЙ
+                            for machine_try in ["1", "2", "3"]:
+                                if len(row) <= machines[machine_try] or not row[machines[machine_try]]:
+                                    cell = f"{letters[machine_try]}{line}"
+                                    place = {"date": cur_date, "day": cur_day,
+                                             "time": time, "machine": machine_try, "cell": cell}
+                                    if self._valid_date(cur_date):
+                                        good_places.append(place)
 
-                except Exception as e:
-                    api_logger.error(f"{e} - {row} - {machine} - {machines[machine]}")
+                    except Exception as e:
+                        api_logger.error(f"{e} - {row} - {machine} - {machines[machine]}")
 
-        return good_places
+            return good_places
+
+        except Exception as e:
+            api_logger.error(e)
+            return []
 
 
 def auth():
