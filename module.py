@@ -74,7 +74,7 @@ class Sheet:
         finally:
             gc.collect()
 
-    def write(self, values: Union[list[str], str], ranges: Union[list[str], str]):
+    def write(self, values: Union[list, str], ranges: Union[list, str]):
         if type(values) != list:
             values = [values]
             ranges = [ranges]
