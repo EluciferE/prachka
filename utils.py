@@ -1,4 +1,16 @@
 from datetime import date, datetime, timedelta
+from time import time
+
+
+def get_time(func):
+    def wrapper(*args, **kwargs):
+        a = time()
+        result = func(*args, **kwargs)
+        b = time()
+        print(f"Func: {func.__name__}()\t Time: {b - a}")
+        return result
+
+    return wrapper
 
 
 def date_now():
