@@ -73,13 +73,14 @@ def check_collisions(db, sheet, tg_bot):
         if not info or info != note[5]:
             ans = f"Кто-то занял ячейку\n{note}\nТам сейчас: {info}"
             tg_bot.send_to_admin(ans)
-    sleep(720 * 60)
+    sleep(180 * 60)
 
 
 def check_updates(db, sheet, tg_bot):
     while True:
         sheet.update_timetable()
         requests = db.get_requests()
+        would_write = []
 
         for req in requests:
             places = sheet.find_places(req[1], req[2], req[3])
@@ -94,12 +95,25 @@ def check_updates(db, sheet, tg_bot):
                 if target_week in user_weeks:
                     continue
 
-                if not sheet.write(req[4], place["cell"]):
-                    msg = f"Привет! Записала тебя на стирку ^^\n\n{req[1].capitalize()}\n{req[2]}\n" + \
-                          f"Машинка: {place['machine']}"
-                    tg_bot.send_to_user(req[0], msg)
-                    db.make_note(req[0], place, req[4])
-                    user_weeks.append(number_of_week(place['date']))
+                would_write.append({"value": req[4], "cell": place["cell"],
+                                    "username": req[0], "day": req[1].capitalize(),
+                                    "time": req[2], 'place': place})
+
+                user_weeks.append(number_of_week(place['date']))
+
+        if would_write:
+            all_values = [x["value"] for x in would_write]
+            all_ranges = [x["cell"] for x in would_write]
+
+            ans = sheet.write(all_values, all_ranges)
+            while ans != 0:
+                ans = sheet.write(all_values, all_ranges)
+
+            for record in would_write:
+                msg = f"Привет! Записала тебя на стирку ^^\n\n{record['day']}\n{record['time']}\n" + \
+                      f"Машинка: {record['place']['machine']}"
+                tg_bot.send_to_user(record['username'], msg)
+                db.make_note(record['username'], record['place'], record['value'])
 
         sleep(10)
 

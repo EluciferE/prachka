@@ -144,8 +144,10 @@ class TgBot:
                     notes = self.db.get_notes(user)
                     for note in notes:
                         if text == note[1]:
+                            ans = self.sheet.write("", note[6])
+                            while ans != 0:
+                                ans = self.sheet.write("", note[6])
                             self.db.delete_note_by_day(user, text)
-                            self.sheet.write("", note[6])
                             gc.collect()
                             deleted = True
                     if deleted:

@@ -11,6 +11,9 @@ import gc
 from threading import Thread
 import logging
 
+from utils import get_time
+from typing import Union
+
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
 logging.basicConfig(level=logging.INFO)
@@ -71,25 +74,32 @@ class Sheet:
         finally:
             gc.collect()
 
-    def write(self, value, range_):
-        if "Текущая запись!" not in range_:
-            range_ = "Текущая запись!" + range_
-        values = [[value]]
-        body = {'values': values}
+    def write(self, values: Union[list[str], str], ranges: Union[list[str], str]):
+        if type(values) != list:
+            values = [values]
+            ranges = [ranges]
+
+        for i, range_ in enumerate(ranges):
+            if "Текущая запись!" not in range_:
+                ranges[i] = "Текущая запись!" + range_
+
+        batch_update_values_request_body = {
+            'value_input_option': "RAW",
+            'data': [{"range": ranges[i], "values": [[values[i]]]} for i in range(len(values))]
+        }
         try:
-            self.service.spreadsheets().values().update(
-                spreadsheetId=self.sheet_id, range=range_,
-                valueInputOption="RAW", body=body).execute()
-            api_logger.info(f"[WRITE] {range_} -> {value}")
+            self.service.spreadsheets().values().batchUpdate(
+                spreadsheetId=self.sheet_id, body=batch_update_values_request_body).execute()
+            for i in range(len(values)):
+                api_logger.info(f"[WRITE] {ranges[i]} -> {values[i]}")
             self.timetable = self.get_values("Текущая запись!A3:I80")
+            gc.collect()
             return 0
 
         except Exception as e:
             api_logger.error(e)
-            return -1
-
-        finally:
             gc.collect()
+            return -1
 
     def find_places(self, day, time, machine):
         try:
