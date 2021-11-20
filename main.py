@@ -81,11 +81,13 @@ def check_updates(db, sheet, tg_bot):
         sheet.update_timetable()
         requests = db.get_requests()
         would_write = []
+        used_places = []
 
         for req in requests:
             places = sheet.find_places(req[1], req[2], req[3])
             # Проверим, записан ли он на этой неделе
             user_weeks = []
+
             notes = db.get_notes(req[0])
             for note in notes:
                 user_weeks.append(number_of_week(note[1]))
@@ -95,6 +97,10 @@ def check_updates(db, sheet, tg_bot):
                 if target_week in user_weeks:
                     continue
 
+                if place["cell"] in used_places:
+                    continue
+
+                used_places.append(place["cell"])
                 would_write.append({"value": req[4], "cell": place["cell"],
                                     "username": req[0], "day": req[1].capitalize(),
                                     "time": req[2], 'place': place})
