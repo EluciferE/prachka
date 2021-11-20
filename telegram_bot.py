@@ -344,7 +344,7 @@ class TgBot:
                 self.bot_logger.error(e)
                 self.bot_logger.info("Bot has just stopped")
                 self.working = False
-                sleep(15)
+                sleep(5)
 
     def send_to_admin(self, msg):
         id_ = self.db.get_chat_id("EluciferE")

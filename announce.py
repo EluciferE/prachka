@@ -53,6 +53,7 @@ class Announce:
     def update_time(self):
         next_date = self.announce_time + timedelta(days=1)
         self.announce_time = next_date
+        self.done = False
 
     def create_time(self, announce_time: tuple) -> datetime:
         datenow = datetime.today()

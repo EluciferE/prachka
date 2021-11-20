@@ -45,7 +45,7 @@ def update_announce(db):
     not_done = [x for x in announces if not x.done]
     if not not_done:
         for announce in announces:
-            announce.update_time()
+                announce.update_time()
 
     notes = db.all_notes()
     for note in notes:
