@@ -269,8 +269,15 @@ class TgBot:
                 else:
                     self.db.change_tmp(user, tmp + f"{text}/")
                     self.db.change_status(user, STATUS.WRITE_NOTE)
+
+                    req = self.db.get_request(user)
+                    keyboard = back_keyboard
+                    if req:
+                        value = req[0][-1]
+                        keyboard = self.create_keyboard([value, back], 2)
+
                     self.bot.send_message(message.chat.id, "Что вписать в таблицу? (f.e. Иванов, 228г)",
-                                          reply_markup=back_keyboard)
+                                          reply_markup=keyboard)
 
             elif status == STATUS.WRITE_NOTE:
                 tmp = self.parse_tmp(self.db.get_tmp(user))
