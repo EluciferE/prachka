@@ -9,6 +9,10 @@ from db import DataBase
 from datetime import datetime
 from utils import date_now
 
+# For thank stiker
+from random import choice
+from stikers import THANK_STIKERS
+
 
 class TgBot:
     def __init__(self, token_, sheet_, database: DataBase):
@@ -51,15 +55,20 @@ class TgBot:
             if status == STATUS.NEW and text == "Я хочу пользоваться ботом":
                 self.new_user(message)
                 return
+
+            elif status == STATUS.BANNED:
+                self.bot.send_message(message.chat.id, "Злюка(")
+                return
+
+            elif "спасибо" in text.lower() and status != STATUS.WRITE_NOTE:
+                self.bot.send_sticker(message.chat.id, choice(THANK_STIKERS))
+                return
+
             elif status == STATUS.NEW:
                 self.bot.send_message(message.chat.id, "Сначала нажми на кнопку ⬇️", reply_markup=first_keyboard)
 
             elif status == STATUS.ASK_ALLOW:
                 self.bot.send_message(message.chat.id, "Ты уже попросил доступ")
-                return
-
-            elif status == STATUS.BANNED:
-                self.bot.send_message(message.chat.id, "Злюка(")
                 return
 
             elif "MainMenu" in status:
@@ -432,7 +441,7 @@ class TgBot:
                 dates.append(note[1])
                 ans += NOTE.format(note[1], note[2], note[3], note[4]) + '\n\n'
         ans += "Какую хочешь удалить?"
-        
+
         if not dates:
             self.bot.send_message(message.chat.id, "Я не нашла твоих записей", reply_markup=stand_keyboard)
             return
