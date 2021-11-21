@@ -37,16 +37,11 @@ def main():
         announces.append(Announce(db, tg_bot, "Стирка закончилась!", new_time, target_time))
 
     update_announce(db)
+    print(*announces, sep="\n")
     Thread(target=check_announce, args=(db,)).start()
 
 
 def update_announce(db):
-    global announces
-    not_done = [x for x in announces if not x.done]
-    if not not_done:
-        for announce in announces:
-                announce.update_time()
-
     notes = db.all_notes()
     for note in notes:
         if pasted_date(note[1]):
@@ -57,8 +52,7 @@ def check_announce(db):
     global announces
     while True:
         for announce in announces:
-            if announce.try_announce():
-                update_announce(db)
+            announce.try_announce()
 
         sleep(10)
 

@@ -30,7 +30,7 @@ class Announce:
                     while not self.tg_bot.working:
                         sleep(5)
                     self.tg_bot.send_to_user(user, self.message)
-                self.done = True
+                self.update_time()
         else:  # ANNOUNCE FOR THE NEXT DAY
             next_date = now + timedelta(days=1)
             next_day, next_month, next_year = map(str, [next_date.day, next_date.month, next_date.year])
@@ -46,7 +46,7 @@ class Announce:
                     while not self.tg_bot.working:
                         sleep(5)
                     self.tg_bot.send_to_user(user, self.message)
-                self.done = True
+                self.update_time()
 
         return self.done
 
@@ -61,7 +61,7 @@ class Announce:
         hours, minute = datenow.hour, datenow.minute
 
         if (announce_time[0] * 60 + announce_time[0]) < (hours * 60 + minute):
-            self.done = True
+            return datetime(year, month, day, announce_time[0], announce_time[1]) + timedelta(days=1)
 
         return datetime(year, month, day, announce_time[0], announce_time[1])
 
