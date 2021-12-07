@@ -579,8 +579,14 @@ class TgBot:
             self.bot.send_message(self.db.get_chat_id(text), f"Unbanned", reply_markup=stand_keyboard)
 
     def send_to_user(self, username, message):
-        chat_id = self.db.get_chat_id(username)
-        self.bot.send_message(chat_id, message)
+        while True:
+            try:
+                chat_id = self.db.get_chat_id(username)
+                self.bot.send_message(chat_id, message)
+                break
+            except Exception as e:
+                self.tg_logger.error(f"SEND TO USER {username = }, {message = }, error: {e}")
+                sleep(5)
 
     def free_times(self, day):
         requests = self.get_all_requests()

@@ -27,8 +27,6 @@ class Announce:
                 users = self.db.note_by_time(f"{now_day}.{now_month}.{now_year}", self.target_time)
                 for user in users:
                     user = str(user[0])
-                    while not self.tg_bot.working:
-                        sleep(5)
                     self.tg_bot.send_to_user(user, self.message)
                 self.update_time()
         else:  # ANNOUNCE FOR THE NEXT DAY
@@ -43,8 +41,6 @@ class Announce:
                 users = self.db.note_by_date(f"{next_day}.{next_month}.{next_year}")
                 for user in users:
                     user = str(user[0])
-                    while not self.tg_bot.working:
-                        sleep(5)
                     self.tg_bot.send_to_user(user, self.message)
                 self.update_time()
 
