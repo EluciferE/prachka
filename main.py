@@ -22,7 +22,8 @@ def main():
     tg_bot = TgBot(token, sheet, db)
 
     Thread(target=tg_bot.start_bot).start()
-    Thread(target=check_collisions, args=(db, sheet, tg_bot,)).start()
+    # TODO
+    #Thread(target=check_collisions, args=(db, sheet, tg_bot,)).start()
     Thread(target=check_updates, args=(db, sheet, tg_bot,)).start()
 
     for an_time, target_time in an_times.items():
@@ -37,7 +38,6 @@ def main():
         announces.append(Announce(db, tg_bot, "Стирка закончилась!", new_time, target_time))
 
     update_announce(db)
-    print(*announces, sep="\n")
     Thread(target=check_announce, args=(db,)).start()
 
 
@@ -50,11 +50,24 @@ def update_announce(db):
 
 def check_announce(db):
     global announces
+    n = 0
     while True:
-        for announce in announces:
-            announce.try_announce()
+        try:
+            update_announce(db)
+            for announce in announces:
+                announce.try_announce()
+            if n % 360 == 0:
+                print("-------------")
+                print(datetime.now())
+                print(*announces, sep="\n")
+            n += 1
 
-        sleep(10)
+            sleep(10)
+        except Exception as e:
+            print("---------------!!!!---------------")
+            print("Крыыыса:", e)
+            print(datetime.now())
+            print("---------------!!!!---------------")
 
 
 def check_collisions(db, sheet, tg_bot):
@@ -102,19 +115,18 @@ def check_updates(db, sheet, tg_bot):
                 user_weeks.append(number_of_week(place['date']))
 
         if would_write:
-            all_values = [x["value"] for x in would_write]
-            all_ranges = [x["cell"] for x in would_write]
+           all_values = [x["value"] for x in would_write]
+           all_ranges = [x["cell"] for x in would_write]
 
-            ans = sheet.write(all_values, all_ranges)
-            while ans != 0:
-                ans = sheet.write(all_values, all_ranges)
+           #ans = sheet.write(all_values, all_ranges)
+           # while ans != 0:
+           #     ans = sheet.write(all_values, all_ranges)
 
-            for record in would_write:
-                msg = f"Привет! Записала тебя на стирку ^^\n\n{record['day']}\n{record['time']}\n" + \
-                      f"Машинка: {record['place']['machine']}"
+           for record in would_write:
+                msg = f"Открылась таблица для записи https://docs.google.com/spreadsheets/d/1MsHAF96UronEmuXM1TgQrrnGuiNOaiUuHAEwAdpqqis/edit#gid=0"
                 tg_bot.send_to_user(record['username'], msg)
-                db.make_note(record['username'], record['place'], record['value'])
-
+          #      db.make_note(record['username'], record['place'], record['value'])
+           return 0
         sleep(10)
 
 
