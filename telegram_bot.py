@@ -13,9 +13,12 @@ from utils import date_now
 from random import choice
 from stikers import THANK_STIKERS
 
+from module import create_config, get_sheet
+from config import sheet_id
+
 
 class TgBot:
-    def __init__(self, token_, sheet_, database: DataBase):
+    def __init__(self, token_, database: DataBase, sheet_=None):
         self.bot = telebot.TeleBot(token_)
         self.sheet = sheet_
         self.db = database
@@ -37,6 +40,12 @@ class TgBot:
 
         @self.bot.message_handler(func=lambda message: True)
         def any_command(message):
+
+            if self.sheet == -1:
+                self.sheet = get_sheet("EluciferE", sheet_id, self)
+                if self.sheet != -1:
+                    self.send_to_admin("Получила токен, спасибо <3")
+
             user = message.from_user.username
             text = message.text
 

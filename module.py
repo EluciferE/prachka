@@ -1,6 +1,6 @@
 import os.path
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import InstalledAppFlow, Flow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from datetime import datetime
@@ -13,6 +13,9 @@ import logging
 
 from utils import get_time
 from typing import Union
+
+from shutil import move
+from config import host
 
 # LOGGING
 FORMAT = '[%(asctime)s] - [%(levelname)s] - %(message)s'
@@ -161,21 +164,45 @@ class Sheet:
             return []
 
 
-def auth():
+def create_config(username, tg_bot):
+    flow = InstalledAppFlow.from_client_secrets_file(
+        f'credentials.json', SCOPES)
+
+    #tg_bot.send_to_user(username, f"Open this url: {url}")
+    creds = flow.run_local_server(host=host, open_browser=False)
+
+    print(f"Creds: {creds}")
+    with open(f'tokens/{username}.json', 'w') as token:
+        token.write(creds.to_json())
+
+    return creds
+
+
+def auth(username, tg_bot):
     creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if os.path.exists(f'tokens/{username}.json'):
+        creds = Credentials.from_authorized_user_file(f'tokens/{username}.json', SCOPES)
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
 
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+            with open(f'tokens/{username}.json', 'w') as token:
+                token.write(creds.to_json())
+        elif tg_bot is not None:
+            # try:
+            creds = create_config(username, tg_bot)
+            # except Exception as e:
+            #    tg_bot.send_to_user(username, "Something goes wrong")
+        else:
+            return -1
 
     service = build('sheets', 'v4', credentials=creds)
 
     return service
+
+
+def get_sheet(username: str, sheet_id: str, tg_bot=None) -> Sheet:
+    service = auth(username, tg_bot)
+    if service != -1:
+        return Sheet(service, sheet_id)
+    return -1
