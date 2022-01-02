@@ -1,4 +1,4 @@
-from sheetWork.module import get_sheet
+from sheetWork.sheet import get_sheet
 from dataBase.db import DataBase
 from telegramBot.telegram_bot import TgBot
 from announces.announce import Announce
@@ -25,7 +25,7 @@ def main():
     #Thread(target=check_collisions, args=(db, sheet, tg_bot,)).start()
     Thread(target=check_updates, args=(db, tg_bot,)).start()
 
-    Thread(target=check_announce, args=(db, tg_bot,)).start()
+    #Thread(target=check_announce, args=(db, tg_bot,)).start()
 
 
 def expired_notes(db):
