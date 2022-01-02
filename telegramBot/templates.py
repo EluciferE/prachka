@@ -51,11 +51,11 @@ back_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
 standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Моё расписание", "Мои записи",
                                                               "Настроить расписание", "Удалить запись",
-                                                              "Удалить расписание"]]
+                                                              "Авторизация", "Удалить расписание"]]
 stand_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 stand_keyboard.row(standard_buttons[0], standard_buttons[1])
 stand_keyboard.row(standard_buttons[2], standard_buttons[3])
-stand_keyboard.row(standard_buttons[4])
+stand_keyboard.row(standard_buttons[4], standard_buttons[5])
 
 accept_buttons = [telebot.types.KeyboardButton(x) for x in ["Подтвердить",
                                                             "Отмена"]]
@@ -68,3 +68,14 @@ accept_timetable_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
 banned_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
 banned_keyboard.row(telebot.types.KeyboardButton("Прости"))
+
+#Keyboards for token menu
+
+ask_token = [telebot.types.KeyboardButton(x) for x in ["Да", "Нет"]]
+ask_token_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+ask_token_keyboard.row(ask_token[0], ask_token[1])
+
+analyze_token = [telebot.types.KeyboardButton(x) for x in ["Поменять учетную запись", "Удалить авторизацию", back]]
+analyze_token_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+analyze_token_keyboard.row(analyze_token[0], analyze_token[1])
+analyze_token_keyboard.row(analyze_token[2])

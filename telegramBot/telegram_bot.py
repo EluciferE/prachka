@@ -13,6 +13,9 @@ from telegramBot.stikers import THANK_STIKERS
 
 from sheetWork.sheet import get_sheet
 from configs.config import sheet_id
+from sheetWork.sheet import create_config
+
+from os import path, remove
 
 
 class TgBot:
@@ -78,7 +81,7 @@ class TgBot:
                 self.bot.send_message(message.chat.id, "Ты уже попросил доступ")
                 return
 
-            elif "MainMenu" in status:
+            elif status == STATUS.MAIN_MENU:
                 if text == "Мои записи":
                     self.my_notes(message)
 
@@ -94,6 +97,9 @@ class TgBot:
 
                 elif text == "Удалить расписание":
                     self.delete_timetable(message)
+
+                elif text == "Авторизация":
+                    self.check_token(message)
 
                 elif text.lower() == 'admin':
                     if user == "EluciferE":
@@ -138,7 +144,7 @@ class TgBot:
                     self.db.accept_signup(text)
                     self.bot.send_message(self.db.get_chat_id(text), "Можешь записываться ^^",
                                           reply_markup=stand_keyboard)
-                    self.db.change_status(text, "MainMenu")
+                    self.db.change_status(text, STATUS.MAIN_MENU)
                     self.bot.send_message(message.chat.id, "Вы такой щедрый ^^", reply_markup=admin_keyboard)
                 else:
                     self.bot.send_message(message.chat.id, "Я не смогла найти такого пользователя T_T",
@@ -356,6 +362,23 @@ class TgBot:
                     self.db.change_status(user, STATUS.MAIN_MENU)
                     self.db.change_tmp(user, "")
                     self.bot.send_message(message.chat.id, "Расписание не сохранено", reply_markup=stand_keyboard)
+            elif status == STATUS.CHECK_TOKEN:
+                self.db.change_status(user, STATUS.MAIN_MENU)
+                if text == "Да":
+                    create_config(user, self)
+                else:
+                    self.bot.send_message(message.chat.id, "Хорошо", reply_markup=stand_keyboard)
+
+            elif status == STATUS.ANALYZE_TOKEN:
+                self.db.change_status(user, STATUS.MAIN_MENU)
+                if text == "Поменять учетную запись":
+                    remove(f"tokens/{user}.json")
+                    create_config(user, self)
+                elif text == "Удалить авторизацию":
+                    remove(f"tokens/{user}.json")
+                    self.bot.send_message(message.chat.id, "Авторизация удалена", reply_markup=stand_keyboard)
+                else:
+                    self.bot.send_message(message.chat.id, "^^", reply_markup=stand_keyboard)
 
     def start_bot(self):
         while True:
@@ -388,6 +411,15 @@ class TgBot:
             tmp = {"day": request[1], "time": request[2], "machine": request[3]}
             req.append(tmp)
         return req
+
+    def check_token(self, message):
+        if path.exists(f"tokens/{message.from_user.username}.json"):
+            self.bot.send_message(message.chat.id, "Ты уже авторизован", reply_markup=analyze_token_keyboard)
+            self.db.change_status(message.from_user.username, STATUS.ANALYZE_TOKEN)
+        else:
+            self.bot.send_message(message.chat.id, "Ты не авторизован. Хочешь авторизоваться сейчас?",
+                                  reply_markup=ask_token_keyboard)
+            self.db.change_status(message.from_user.username, STATUS.CHECK_TOKEN)
 
     @staticmethod
     def parse_tmp(tmp):
@@ -585,11 +617,11 @@ class TgBot:
             self.bot.send_message(message.chat.id, f"Разбанила {text}", reply_markup=admin_keyboard)
             self.bot.send_message(self.db.get_chat_id(text), f"Unbanned", reply_markup=stand_keyboard)
 
-    def send_to_user(self, username, message):
+    def send_to_user(self, username, message, keyboard=None):
         while True:
             try:
                 chat_id = self.db.get_chat_id(username)
-                self.bot.send_message(chat_id, message)
+                self.bot.send_message(chat_id, message, reply_markup=keyboard)
                 break
             except Exception as e:
                 self.tg_logger.error(f"SEND TO USER {username = }, {message = }, error: {e}")

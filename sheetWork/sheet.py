@@ -19,6 +19,9 @@ from typing import Union
 
 from configs.config import host
 
+from telegramBot.status import STATUS
+from telegramBot.templates import *
+
 # LOGGING
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -74,7 +77,11 @@ class Sheet:
             url = _params_to_get(url, {"access_token": self.token.access_token()})
 
             r = requests.get(url)
-            return r.json()["values"]
+            if r.json().get("values"):
+                return r.json().get("values")
+
+            api_logger.error(r.text)
+            return None
 
         except Exception as e:
             api_logger.error(e)
@@ -91,6 +98,7 @@ class Sheet:
                       "range": range_,
                       "values": [[value]]}
             r = requests.put(url, json=params)
+            print(r.text)
             api_logger.info(f"[WRITE] {value} -> {range_}")
             self.timetable = self.get_values("Текущая запись!A3:I80")
             gc.collect()
@@ -99,6 +107,7 @@ class Sheet:
         except Exception as e:
             api_logger.error(e)
             gc.collect()
+            print(e)
             return -1
 
     def find_places(self, day, time, machine):
@@ -194,7 +203,8 @@ def create_config(username, tg_bot):
                 sleep(10)
             n += 1
         else:
-            tg_bot.send_to_user(username, "Получил твой токен!")
+            tg_bot.send_to_user(username, "Получила твой токен!", keyboard=stand_keyboard)
+            tg_bot.db.change_status(username, STATUS.MAIN_MENU)
             creds = r.json()
             break
 
@@ -211,11 +221,16 @@ def auth(username, tg_bot):
     creds = None
     if os.path.exists(f'tokens/{username}.json'):
         creds = Token(username, path_to_token=f'tokens/{username}.json')
-    if not creds:  # or not creds.valid: TODO
-        # if creds and creds.expired and creds.refresh_token:
-        #    creds.refresh(Request())
+        # VALIDATE
+        url = f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={creds.access_token()}"
+        r = requests.get(url)
+        if r.json().get("error"):
+            print("ХУЕСАСЯ")
+            print(r.json())
+            creds.refresh_token()
+    if not creds:
         if tg_bot is not None:
-            creds = Token(username, create_config(username, tg_bot))
+            creds = Token(username, json_token=create_config(username, tg_bot))
         else:
             return -1
 
@@ -225,7 +240,5 @@ def auth(username, tg_bot):
 def get_sheet(username: str, sheet_id: str, tg_bot=None) -> Sheet:
     service = auth(username, tg_bot)
     if service != -1:
-        sheet = Sheet(service, sheet_id)
-        sheet.get_values("A10:B50")
         return Sheet(service, sheet_id)
     return -1

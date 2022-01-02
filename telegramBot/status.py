@@ -18,3 +18,6 @@ class STATUS:
     WRITE_NOTE = "WriteNote"
     ACCEPT_TIMETABLE = "AcceptTimetable"
 
+    CHECK_TOKEN = "CheckToken"
+    ANALYZE_TOKEN = "AnalyzeToken"
+
