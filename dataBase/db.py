@@ -27,6 +27,8 @@ class DataBase:
                                (username text, date text, day text, time text, machine text, value text, cell text)''')
         self.cur.execute('''CREATE TABLE IF NOT EXISTS signup
                                (username text, date text)''')
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS anti_spam
+                                       (username text, flag text)''')
 
     def insert_signup(self, username, date):
         try:
@@ -257,5 +259,33 @@ class DataBase:
             with self.lock:
                 ans = self.cur.execute('''SELECT username FROM users where status="Banned"''')
                 return [x for x in ans]
+        except Exception as e:
+            self.db_logger.error(e)
+
+    def mark_as_announced(self, username):
+        try:
+            with self.lock:
+                ans1 = self.cur.execute('''SELECT * FROM anti_spam WHERE username=(?)''', (username,))
+                ans1 = [_ for _ in ans1]
+                print(f"mark_as_announced {username}: {ans1}")
+                if ans1:
+                    self.cur.execute('''UPDATE anti_spam SET=(?) WHERE username=(?)''', ("done", username))
+                else:
+                    self.cur.execute('''INSERT INTO anti_spam VALUES ((?), (?))''', (username, "done"))
+                self.con.commit()
+        except Exception as e:
+            self.db_logger.error(e)
+
+    def is_announced(self, username):
+        try:
+            with self.lock:
+                ans1 = self.cur.execute('''SELECT flag FROM anti_spam WHERE username=(?)''', (username,))
+                ans1 = [_ for _ in ans1]
+                print(f"is_announced {username}: {ans1}")
+                if not ans1:
+                    return False
+                if ans1[0][0] == "done":
+                    return True
+                return False
         except Exception as e:
             self.db_logger.error(e)
