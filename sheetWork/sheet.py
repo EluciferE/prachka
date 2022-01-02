@@ -99,6 +99,9 @@ class Sheet:
                       "values": [[value]]}
             r = requests.put(url, json=params)
             print(r.text)
+            if "error" in r.json():
+                raise ValueError(r.text)
+
             api_logger.info(f"[WRITE] {value} -> {range_}")
             self.timetable = self.get_values("Текущая запись!A3:I80")
             gc.collect()
