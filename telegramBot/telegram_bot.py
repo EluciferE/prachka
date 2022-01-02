@@ -11,7 +11,7 @@ from utils import date_now
 from random import choice
 from telegramBot.stikers import THANK_STIKERS
 
-from sheetWork.module import get_sheet
+from sheetWork.sheet import get_sheet
 from configs.config import sheet_id
 
 
