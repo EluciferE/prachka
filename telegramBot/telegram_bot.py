@@ -166,16 +166,20 @@ class TgBot:
                     notes = self.db.get_notes(user)
                     for note in notes:
                         if text == note[1]:
-                            ans = self.sheet.write("", note[6])
-                            while ans != 0:
-                                ans = self.sheet.write("", note[6])
-                            self.db.delete_note_by_day(user, text)
-                            gc.collect()
-                            deleted = True
+                            if not path.exists(f"tokens/{user}.json"):
+                                self.bot.send_message(message.chat.id, "Ты не авторизован", reply_markup=stand_keyboard)
+
+                            tmp_sheet = get_sheet(user, sheet_id, self)
+                            ans = tmp_sheet.write("", note[6])
+                            if ans != 0:
+                                self.bot.send_message(message.chat.id, "Что-то пошло не так(((", reply_markup=stand_keyboard)
+                                self.send_to_admin(f"{user} не смог удалить запись... Чекай логи")
+                            else:
+                                self.db.delete_note_by_day(user, text)
+                                gc.collect()
+                                deleted = True
                     if deleted:
                         self.bot.send_message(message.chat.id, "Я удалила запись", reply_markup=stand_keyboard)
-                    else:
-                        self.bot.send_message(message.chat.id, "Чёт странная дата....", reply_markup=stand_keyboard)
 
             elif status == STATUS.DELETE_TIMETABLE:
                 self.db.change_status(user, STATUS.MAIN_MENU)
