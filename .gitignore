@@ -1,9 +1,9 @@
 logs/*
 
-config.py
-credentials.json
+configs/config.py
+configs/credentials.json
 
-main.db
+dataBase/main.db
 run.sh
 stop.sh
 
