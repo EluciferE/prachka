@@ -1,7 +1,6 @@
-from datetime import datetime, time, timedelta, date
-from telegram_bot import TgBot
-from db import DataBase
-from time import sleep
+from datetime import datetime, timedelta
+from telegramBot.telegram_bot import TgBot
+from dataBase.db import DataBase
 
 
 class Announce:
