@@ -10,6 +10,7 @@ from threading import Thread
 from utils import pasted_date, number_of_week
 
 from random import randrange
+from os import path
 
 an_times = {(4, 35): "8:45 - 10:45", (7, 50): "12:00 - 14:00",
             (11, 50): "16:00 - 18:00", (15, 50): "20:00 - 22:00", (16, 00): ""}
@@ -100,6 +101,11 @@ def check_updates(db, tg_bot):
                     continue
 
                 sleep(randrange(2, 5))
+                if not path.exists(f"tokens/{req[0]}.json"):
+                    if not db.is_announced(req[0]):
+                        tg_bot.send_to_user(req[0], "Запись открыта! Ты не авторизован, поэтому не могут тебя записать(")
+                        db.mark_as_announced(req[0])
+                    continue
 
                 new_sheet = get_sheet(req[0], sheet_id, tg_bot)
 
