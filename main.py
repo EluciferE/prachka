@@ -7,7 +7,7 @@ from configs.config import token, sheet_id
 from time import sleep
 
 from threading import Thread
-from utils import pasted_date, number_of_week
+from utils import pasted_date, number_of_week, date_now
 
 from random import randrange
 from os import path
@@ -102,9 +102,12 @@ def check_updates(db, tg_bot):
 
                 sleep(randrange(2, 5))
                 if not path.exists(f"tokens/{req[0]}.json"):
-                    if not db.is_announced(req[0]):
+                    ans = db.is_announced(req[0])
+                    if not ans or number_of_week(date_now()) != int(ans):
                         tg_bot.send_to_user(req[0], "Запись открыта! Ты не авторизован, поэтому не могут тебя записать(")
-                        db.mark_as_announced(req[0])
+                        db.mark_as_announced(req[0], str(number_of_week(date_now())))
+                    else:
+                        db.mark_as_announced(req[0], str(number_of_week(date_now())))
                     continue
 
                 new_sheet = get_sheet(req[0], sheet_id, tg_bot)

@@ -262,16 +262,16 @@ class DataBase:
         except Exception as e:
             self.db_logger.error(e)
 
-    def mark_as_announced(self, username):
+    def mark_as_announced(self, username, week):
         try:
             with self.lock:
                 ans1 = self.cur.execute('''SELECT * FROM anti_spam WHERE username=(?)''', (username,))
                 ans1 = [_ for _ in ans1]
                 print(f"mark_as_announced {username}: {ans1}")
                 if ans1:
-                    self.cur.execute('''UPDATE anti_spam SET=(?) WHERE username=(?)''', ("done", username))
+                    self.cur.execute('''UPDATE anti_spam SET=(?) WHERE username=(?)''', (week, username))
                 else:
-                    self.cur.execute('''INSERT INTO anti_spam VALUES ((?), (?))''', (username, "done"))
+                    self.cur.execute('''INSERT INTO anti_spam VALUES ((?), (?))''', (username, week))
                 self.con.commit()
         except Exception as e:
             self.db_logger.error(e)
@@ -284,8 +284,6 @@ class DataBase:
                 print(f"is_announced {username}: {ans1}")
                 if not ans1:
                     return False
-                if ans1[0][0] == "done":
-                    return True
-                return False
+                return ans1[0][0]
         except Exception as e:
             self.db_logger.error(e)
