@@ -265,9 +265,8 @@ class DataBase:
     def mark_as_announced(self, username, week):
         try:
             with self.lock:
-                ans1 = self.cur.execute('''SELECT * FROM anti_spam WHERE username=(?)''', (username,))
+                ans1 = self.cur.execute('''SELECT flag FROM anti_spam WHERE username=(?)''', (username,))
                 ans1 = [_ for _ in ans1]
-                print(f"mark_as_announced {username}: {ans1}")
                 if ans1:
                     self.cur.execute('''UPDATE anti_spam SET=(?) WHERE username=(?)''', (week, username))
                 else:
@@ -281,7 +280,6 @@ class DataBase:
             with self.lock:
                 ans1 = self.cur.execute('''SELECT flag FROM anti_spam WHERE username=(?)''', (username,))
                 ans1 = [_ for _ in ans1]
-                print(f"is_announced {username}: {ans1}")
                 if not ans1:
                     return False
                 return ans1[0][0]
