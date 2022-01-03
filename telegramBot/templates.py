@@ -51,7 +51,7 @@ back_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
 standard_buttons = [telebot.types.KeyboardButton(x) for x in ["Моё расписание", "Мои записи",
                                                               "Настроить расписание", "Удалить запись",
-                                                              "Авторизация", "Удалить расписание"]]
+                                                              "Удалить расписание", "Авторизация"]]
 stand_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 stand_keyboard.row(standard_buttons[0], standard_buttons[1])
 stand_keyboard.row(standard_buttons[2], standard_buttons[3])

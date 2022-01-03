@@ -168,6 +168,7 @@ class TgBot:
                         if text == note[1]:
                             if not path.exists(f"tokens/{user}.json"):
                                 self.bot.send_message(message.chat.id, "Ты не авторизован", reply_markup=stand_keyboard)
+                                return
 
                             tmp_sheet = get_sheet(user, sheet_id, self)
                             ans = tmp_sheet.write("", note[6])

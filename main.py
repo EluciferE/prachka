@@ -106,7 +106,7 @@ def check_updates(db, tg_bot):
                     if not ans or number_of_week(date_now()) != int(ans):
                         tg_bot.send_to_user(req[0], "Запись открыта! Ты не авторизован, поэтому не могут тебя записать(")
                         db.mark_as_announced(req[0], str(number_of_week(date_now())))
-                    else:
+                    elif number_of_week(date_now()) != int(ans):
                         db.mark_as_announced(req[0], str(number_of_week(date_now())))
                     continue
 
