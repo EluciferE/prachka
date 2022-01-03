@@ -98,7 +98,6 @@ class Sheet:
                       "range": range_,
                       "values": [[value]]}
             r = requests.put(url, json=params)
-            print(r.text)
             if "error" in r.json():
                 raise ValueError(r.text)
 
