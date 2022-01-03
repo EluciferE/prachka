@@ -111,11 +111,16 @@ def check_updates(db, tg_bot):
                     continue
 
                 new_sheet = get_sheet(req[0], sheet_id, tg_bot)
-
+                ans = None
                 try:
-                    new_sheet.write(req[4], place["cell"])
+                    ans = new_sheet.write(req[4], place["cell"])
                 except Exception as e:
                     print(f"Write exception[{req[0]}]: {e}")
+                    continue
+
+                if ans == -1:
+                    tg_bot.send_to_user(req[0], "Я не смогла тебя записать(( Попробуй обновить токен")
+                    tg_bot.send_to_admin(f"Траблы с записью {req[0]}")
                     continue
 
                 msg = f"Привет! Записала тебя на стирку ^^\n\n{req[1].capitalize()}\n{req[2]}\n" + \
