@@ -19,9 +19,9 @@ class Token:
             self._read_from_file(path_to_token)
 
         elif json_token is not None:
-            if isinstance(str, json_token):
+            if isinstance(json_token, type(str)):
                 self.token = json.load(json_token)
-            elif isinstance(dict, json_token):
+            elif isinstance(json_token, type(dict)):
                 self.token = json_token
 
     def _read_from_file(self, path):
@@ -29,15 +29,16 @@ class Token:
             self.token = json.loads(file.read())
 
     def refresh_token(self):
-        params = {"client_id": self.client_data["client_id"],
-                  "client_secret": self.client_data["client_secret"],
+        params = {"client_id": self.client_data["installed"]["client_id"],
+                  "client_secret": self.client_data["installed"]["client_secret"],
                   "refresh_token": self.token["refresh_token"],
-                  "grant_type": "grant_type"}
+                  "grant_type": "refresh_token"}
 
         r = requests.post("https://oauth2.googleapis.com/token", data=params)
         print("DEBUG:: REFRESH::", r.text)
-        with open(f"tokens/{self.username}.json", "w") as file:
-            file.write(json.dumps(r.json()))
+        if not "error" in r.text:
+            with open(f"tokens/{self.username}.json", "w") as file:
+                file.write(json.dumps(r.json()))
 
     def access_token(self):
         return self.token["access_token"]
