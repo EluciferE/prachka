@@ -1,7 +1,6 @@
 logs/*
 
-configs/config.py
-configs/credentials.json
+configs/*
 
 dataBase/main.db
 run.sh
@@ -11,4 +10,5 @@ tokens/
 .idea/
 __pycache__/
 venv/
-error_
+error_*
+main.log
