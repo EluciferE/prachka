@@ -63,13 +63,10 @@ class Token:
         if r.json().get("error"):
             tokens_logger.info(f"Bad validate of token by {self._username}")
             return False
-        tokens_logger.info(f"Token passed validation {self._username}")
         return True
-
-    @property
+    #TODO Make property
     def access_token(self):
         return self._token["access_token"]
 
-    @property
     def token(self):
         return self._token
