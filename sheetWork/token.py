@@ -48,11 +48,17 @@ class Token:
         if "error" not in r.text:
             tokens_logger.info(f"Success refresh token by {self._username}")
             token_json = r.json()
-            token_json["refresh_token"] = self._token["refresh_token"]
+            
+            if "refresh_token" not in token_json:
+                token_json["refresh_token"] = self._token["refresh_token"]
+            else:
+                tokens_logger.info(f"Got new refresh token for {self._username}")
+
             self._token = token_json
             with open(f"tokens/{self._username}.json", "w") as file:
                 file.write(json.dumps(token_json))
             return 0
+        
         else:
             tokens_logger.error(f"Refresh token by {self._username}: {r.text}")
             return -1
