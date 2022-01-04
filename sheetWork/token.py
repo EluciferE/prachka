@@ -51,8 +51,10 @@ class Token:
             self._token = token_json
             with open(f"tokens/{self._username}.json", "w") as file:
                 file.write(json.dumps(token_json))
+            return 0
         else:
             tokens_logger.error(f"Refresh token by {self._username}: {r.text}")
+            return -1
 
     def validate_token(self):
         url = f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={self.access_token()}"

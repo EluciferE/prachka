@@ -82,7 +82,15 @@ def check_collisions(db, sheet, tg_bot):
 
 def check_updates(db, tg_bot):
     sheet = get_sheet("EluciferE", sheet_id, tg_bot)
+    n = 0
     while True:
+        n += 1
+
+        if n % 50 == 0:
+            if not sheet.token.validate_token() and sheet.token.refresh_token() == -1:
+                tg_bot.send_to_user("EluciferE", "У тебя закончился токен((")
+                sheet = get_sheet("EluciferE", sheet_id, tg_bot)
+
         sheet.update_timetable()
         requests = db.get_requests()
 
