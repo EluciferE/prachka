@@ -46,6 +46,7 @@ def _params_to_get(url: str, params: dict):
         url += f"{key}={value}&"
     return url
 
+
 class Sheet:
     def __init__(self, token, sheet_id):
         self.token = token
@@ -74,6 +75,10 @@ class Sheet:
             if "Текущая запись!" not in range_:
                 range_ = "Текущая запись!" + range_
             url = f'https://sheets.googleapis.com/v4/spreadsheets/{self.sheet_id}/values/{range_}'
+
+            if not self.token.validate_token():
+                self.token.refresh_token()
+
             url = _params_to_get(url, {"access_token": self.token.access_token()})
 
             r = requests.get(url)
@@ -93,6 +98,9 @@ class Sheet:
             range_ = "Текущая запись!" + range_
 
         try:
+            if not self.token.validate_token():
+                self.token.refresh_token()
+
             url = f"https://sheets.googleapis.com/v4/spreadsheets/{self.sheet_id}/values/{range_}?access_token={self.token.access_token()}&valueInputOption=RAW"
             params = {"majorDimension": "ROWS",
                       "range": range_,
@@ -223,12 +231,7 @@ def auth(username, tg_bot):
     creds = None
     if os.path.exists(f'tokens/{username}.json'):
         creds = Token(username, path_to_token=f'tokens/{username}.json')
-        # VALIDATE
-        url = f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={creds.access_token()}"
-        r = requests.get(url)
-        if r.json().get("error"):
-            print("ХУЕСАСЯ")
-            print(r.json())
+        if not creds.validate_token():
             creds.refresh_token()
     if not creds:
         if tg_bot is not None:
