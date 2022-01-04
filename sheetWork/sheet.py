@@ -17,8 +17,6 @@ import logging
 
 from typing import Union
 
-from configs.config import host
-
 from telegramBot.status import STATUS
 from telegramBot.templates import *
 
@@ -122,8 +120,11 @@ class Sheet:
 
     def find_places(self, day, time, machine):
         try:
-            if not self.timetable:
+            if self.timetable is None:
                 self.timetable = self.get_values("Текущая запись!A3:I80")
+                if self.timetable is None:
+                    api_logger.error(f"Can't analyze timetable (None type)")
+                    return []
 
             day = day.lower()
 
