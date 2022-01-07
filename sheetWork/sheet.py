@@ -1,4 +1,6 @@
 import os.path
+from sheetWork.main_sheet import MainSheet
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -103,13 +105,13 @@ class Sheet:
             params = {"majorDimension": "ROWS",
                       "range": range_,
                       "values": [[value]]}
+
             r = requests.put(url, json=params)
             if "error" in r.json():
                 raise ValueError(r.text)
 
             api_logger.info(f"[WRITE] {value} -> {range_}")
             self.timetable = self.get_values("Текущая запись!A3:I80")
-            gc.collect()
             return 0
 
         except Exception as e:
@@ -248,3 +250,27 @@ def get_sheet(username: str, sheet_id: str, tg_bot=None) -> Sheet:
     if service != -1:
         return Sheet(service, sheet_id)
     return -1
+
+def main_auth():
+    creds = None
+    if os.path.exists('tokens/token.json'):
+        creds = Credentials.from_authorized_user_file('tokens/token.json', SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'configs/credentials.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+
+        with open('tokens/token.json', 'w') as token:
+            token.write(creds.to_json())
+
+    service = build('sheets', 'v4', credentials=creds)
+
+    return service
+
+
+def get_main_sheet(sheet_id):
+    service = main_auth()
+    return MainSheet(service, sheet_id)
