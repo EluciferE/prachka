@@ -1,4 +1,6 @@
-from sheetWork.sheet import get_sheet
+from sheetWork.sheet import get_sheet, get_main_sheet
+from sheetWork.main_sheet import MainSheet
+
 from dataBase.db import DataBase
 from telegramBot.telegram_bot import TgBot
 from announces.announce import Announce
@@ -82,6 +84,8 @@ def check_collisions(db, sheet, tg_bot):
 
 def check_updates(db, tg_bot):
     sheet = get_sheet("EluciferE", sheet_id, tg_bot)
+    main_sheet = get_main_sheet(sheet_id)
+
     n = 0
     while True:
         n += 1
@@ -108,7 +112,6 @@ def check_updates(db, tg_bot):
                 if target_week in user_weeks:
                     continue
 
-                sleep(randrange(2, 5))
                 if not path.exists(f"tokens/{req[0]}.json"):
                     ans = db.is_announced(req[0])
                     if not ans or number_of_week(date_now()) != int(ans):
@@ -118,10 +121,14 @@ def check_updates(db, tg_bot):
                         db.mark_as_announced(req[0], str(number_of_week(date_now())))
                     continue
 
+                sleep(randrange(3, 5))
                 new_sheet = get_sheet(req[0], sheet_id, tg_bot)
-                ans = None
+                main_sheet.change_color(place["cell"])
+                sleep(3)
+
                 try:
                     ans = new_sheet.write(req[4], place["cell"])
+                    main_sheet.change_color(place["cell"], True)
                 except Exception as e:
                     print(f"Write exception[{req[0]}]: {e}")
                     continue
@@ -139,7 +146,7 @@ def check_updates(db, tg_bot):
 
                 user_weeks.append(number_of_week(place['date']))
 
-        sleep(10)
+        sleep(50)
 
 
 if __name__ == '__main__':
