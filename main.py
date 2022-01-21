@@ -124,7 +124,7 @@ def check_updates(db, tg_bot):
                 sleep(randrange(3, 5))
                 new_sheet = get_sheet(req[0], sheet_id, tg_bot)
                 main_sheet.change_color(place["cell"])
-                sleep(3)
+                sleep(randrange(3, 5))
 
                 try:
                     ans = new_sheet.write(req[4], place["cell"])
@@ -144,9 +144,9 @@ def check_updates(db, tg_bot):
                 db.make_note(req[0], place, req[4])
                 user_weeks.append(number_of_week(place['date']))
 
-                user_weeks.append(number_of_week(place['date']))
+                sleep(10)
 
-        sleep(50)
+        sleep(180)
 
 
 if __name__ == '__main__':
