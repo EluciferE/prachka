@@ -268,7 +268,7 @@ class DataBase:
                 ans1 = self.cur.execute('''SELECT flag FROM anti_spam WHERE username=(?)''', (username,))
                 ans1 = [_ for _ in ans1]
                 if ans1:
-                    self.cur.execute('''UPDATE anti_spam SET=(?) WHERE username=(?)''', (week, username))
+                    self.cur.execute('''UPDATE anti_spam SET flag=(?) WHERE username=(?)''', (week, username))
                 else:
                     self.cur.execute('''INSERT INTO anti_spam VALUES ((?), (?))''', (username, week))
                 self.con.commit()
