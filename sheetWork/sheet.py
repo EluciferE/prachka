@@ -1,5 +1,5 @@
 import os.path
-from sheetWork.main_sheet import MainSheet
+from sheetWork import MainSheet
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -10,7 +10,7 @@ from time import sleep
 
 import requests
 import json
-from sheetWork.token import Token
+from sheetWork import Token
 
 import gc
 
@@ -19,7 +19,7 @@ import logging
 
 from typing import Union
 
-from telegramBot.status import STATUS
+from telegramBot import STATUS
 from telegramBot.templates import *
 
 # LOGGING

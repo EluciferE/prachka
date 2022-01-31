@@ -1,10 +1,10 @@
-from sheetWork.sheet import get_sheet, get_main_sheet
-from sheetWork.main_sheet import MainSheet
+from sheetWork import get_sheet, get_main_sheet
+from sheetWork import MainSheet
 
-from dataBase.db import DataBase
-from telegramBot.telegram_bot import TgBot
-from announces.announce import Announce
-from configs.config import token, sheet_id
+from dataBase import DataBase
+from telegramBot import TgBot
+from announces import Announce
+from configs import token, sheet_id
 
 from time import sleep
 
