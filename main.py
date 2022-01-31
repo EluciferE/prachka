@@ -11,7 +11,7 @@ from time import sleep
 from threading import Thread
 from utils import pasted_date, number_of_week, date_now
 
-from random import randrange
+from random import randrange, shuffle
 from os import path
 
 an_times = {(4, 35): "8:45 - 10:45", (7, 50): "12:00 - 14:00",
@@ -97,6 +97,7 @@ def check_updates(db, tg_bot):
 
         sheet.update_timetable()
         requests = db.get_requests()
+        shuffle(requests)
 
         for req in requests:
             places = sheet.find_places(req[1], req[2], req[3])
@@ -107,6 +108,7 @@ def check_updates(db, tg_bot):
             for note in notes:
                 user_weeks.append(number_of_week(note[1]))
             for place in places:
+                sleep(40)
                 target_week = number_of_week(place['date'])
 
                 if target_week in user_weeks:
@@ -115,7 +117,7 @@ def check_updates(db, tg_bot):
                 if not path.exists(f"tokens/{req[0]}.json"):
                     ans = db.is_announced(req[0])
                     if not ans or number_of_week(date_now()) != int(ans):
-                        tg_bot.send_to_user(req[0], "Запись открыта! Ты не авторизован, поэтому не могут тебя записать(")
+                        tg_bot.send_to_user(req[0], "Запись открыта! Ты не авторизован, поэтому не могут тебя записать( https://clck.ru/anGXc")
                         db.mark_as_announced(req[0], str(number_of_week(date_now())))
                     elif number_of_week(date_now()) != int(ans):
                         db.mark_as_announced(req[0], str(number_of_week(date_now())))

@@ -194,7 +194,8 @@ def create_config(username, tg_bot):
     r = requests.post("https://oauth2.googleapis.com/device/code", data=params)
     ans = r.json()
 
-    tg_bot.send_to_user(username, f"Follow this link: {ans['verification_url']}\n\nCode: {ans['user_code']}")
+    tg_bot.send_to_user(username, f"Follow this link: {ans['verification_url']}\n\nCode:")
+    tg_bot.send_to_user(username, f"{ans['user_code']}")
 
     creds = -1
     n = 0
