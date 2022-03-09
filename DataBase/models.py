@@ -85,11 +85,11 @@ class AntiSpam(Base):
     __tablename__ = "antispam"
 
     username = Column(String, primary_key=True)
-    week = Column(Integer, nullable=False)
+    date = Column(String, nullable=False)
 
-    def __init__(self, username: str, week: int):
+    def __init__(self, username: str, date: str):
         self.username = username
-        self.week = week
+        self.date = date
 
 
 def getSession() -> Session:
