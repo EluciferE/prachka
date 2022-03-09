@@ -10,7 +10,8 @@ banner = "Все записи на таблицу будут от моего и�
 TIMETABLE = "\n{}\n{}\nМашинка: {}\n{}"
 NOTE = "{}\n{}\n{}\nМашинка: {}"
 
-times = ["8:45 - 10:45", "12:00 - 14:00", "16:00 - 18:00", "20:00 - 22:00"]
+times1Machine = ["10:45 - 12:45", "15:00 - 17:00", "19:00 - 21:00", "22:45 - 0:30"]
+times23Machine = ["8:45 - 10:45", "13:00 - 15:00", "17:00 - 19:00", "21:00 - 22:45"]
 days = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
 
 # KEYBOARDS
@@ -31,15 +32,28 @@ days_keyboard.row(days_buttons[0], days_buttons[1], days_buttons[2])
 days_keyboard.row(days_buttons[3], days_buttons[4], days_buttons[5])
 days_keyboard.row(days_buttons[6], telebot.types.KeyboardButton("⬅️ Назад"))
 back = "⬅️ Назад"
-times_buttons = [telebot.types.KeyboardButton(x) for x in times]
-times_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-times_keyboard.row(times_buttons[0], times_buttons[1])
-times_keyboard.row(times_buttons[2], times_buttons[3])
-times_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
 
-wedn_times_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
-wedn_times_keyboard.row(times_buttons[2], times_buttons[3])
-wedn_times_keyboard.row(telebot.types.KeyboardButton("⬅️ Назад"))
+
+times1machine_buttons = [telebot.types.KeyboardButton(x) for x in times1Machine + [back]]
+times23machine_buttons = [telebot.types.KeyboardButton(x) for x in times23Machine + [back]]
+
+times1_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+times1_keyboard.row(times1machine_buttons[0], times1machine_buttons[1])
+times1_keyboard.row(times1machine_buttons[2], times1machine_buttons[3])
+times1_keyboard.row(times1machine_buttons[4])
+
+times23_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+times23_keyboard.row(times23machine_buttons[0], times23machine_buttons[1])
+times23_keyboard.row(times23machine_buttons[2], times23machine_buttons[3])
+times23_keyboard.row(times23machine_buttons[4])
+
+wedn_times_keyboard_1machine = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+wedn_times_keyboard_1machine.row(times1machine_buttons[2], times1machine_buttons[3])
+wedn_times_keyboard_1machine.row(times1machine_buttons[4])
+
+wedn_times_keyboard_23machine = telebot.types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
+wedn_times_keyboard_23machine.row(times23machine_buttons[2], times23machine_buttons[3])
+wedn_times_keyboard_23machine.row(times23machine_buttons[4])
 
 machines_buttons = [telebot.types.KeyboardButton(x) for x in ["1", "2", "3", "⬅️ Назад"]]
 machines_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=3, resize_keyboard=True)
@@ -79,3 +93,69 @@ analyze_token = [telebot.types.KeyboardButton(x) for x in ["Поменять у�
 analyze_token_keyboard = telebot.types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 analyze_token_keyboard.row(analyze_token[0], analyze_token[1])
 analyze_token_keyboard.row(analyze_token[2])
+
+mondayTimes = """
+                            Понедельник
+                            
+10:45 - 12:45:    {}         08:45 - 10:45:    {}    {}
+15:00 - 17:00:    {}         13:00 - 15:00:    {}    {}
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+tuesdayTimes = """
+                                Вторник
+                            
+10:45 - 12:45:    {}         08:45 - 10:45:    {}    {}
+15:00 - 17:00:    {}         13:00 - 15:00:    {}    {}
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+wednesdayTimes = """
+                                Среда
+                            
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+thursdayTimes = """
+                                Четверг
+                        
+10:45 - 12:45:    {}         08:45 - 10:45:    {}    {}
+15:00 - 17:00:    {}         13:00 - 15:00:    {}    {}
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+fridayTimes = """
+                                Пятница
+                            
+10:45 - 12:45:    {}         08:45 - 10:45:    {}    {}
+15:00 - 17:00:    {}         13:00 - 15:00:    {}    {}
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+saturdayTimes = """
+                                Суббота
+                        
+10:45 - 12:45:    {}         08:45 - 10:45:    {}    {}
+15:00 - 17:00:    {}         13:00 - 15:00:    {}    {}
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+sundayTimes = """
+                            Воскресенье
+                            
+10:45 - 12:45:    {}         08:45 - 10:45:    {}    {}
+15:00 - 17:00:    {}         13:00 - 15:00:    {}    {}
+19:00 - 21:00:    {}         17:00 - 19:00:    {}    {}
+22:45 - 00:30:    {}         21:00 - 22:45:    {}    {}
+"""
+
+msgTimes = {"понедельник": mondayTimes, "вторник": tuesdayTimes,
+            "среда": wednesdayTimes, "четверг": thursdayTimes,
+            "пятница": fridayTimes, "суббота": saturdayTimes,
+            "воскресенье": sundayTimes}
