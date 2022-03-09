@@ -2,7 +2,7 @@ logs/*
 
 configs/*
 
-dataBase/main.db
+DataBase/main.sqlite*
 run.sh
 stop.sh
 

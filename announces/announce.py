@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from telegramBot.telegram_bot import TgBot
-from dataBase.db import DataBase
+from TelegramBot.telegram_bot import TgBot
+
+from DataBase import Session, Note
 
 
 class Announce:
-    def __init__(self, db: DataBase, tg_bot: TgBot, message, announce_time, target_time):
+    def __init__(self, db: Session, tg_bot: TgBot, message, announce_time, target_time):
         self.db = db
         self.tg_bot = tg_bot
         self.message = message
@@ -16,14 +17,13 @@ class Announce:
 
     def try_announce(self) -> bool:
         now = datetime.now()
-        now_day, now_month, now_year = map(str, [now.day, now.month, now.year])
-        now_day = '0' * (2 - len(now_day)) + now_day
-        now_month = '0' * (2 - len(now_month)) + now_month
+        dateNow = self.dateToStr(now)
 
         if self.target_time:
             seconds = (self.announce_time - now).total_seconds()
             if seconds <= 0 and not self.done:
-                users = self.db.note_by_time(f"{now_day}.{now_month}.{now_year}", self.target_time)
+                notes = self.db.query(Note).filter()
+                users = self.db.note_by_time(dateNow, self.target_time)
                 for user in users:
                     user = str(user[0])
                     self.tg_bot.send_to_user(user, self.message)
@@ -50,7 +50,15 @@ class Announce:
         self.announce_time = next_date
         self.done = False
 
-    def create_time(self, announce_time: tuple) -> datetime:
+    @staticmethod
+    def dateToStr(date) -> str:
+        day, month, year = map(str, [date.day, date.month, date.year])
+        day = day.zfill(2)
+        month = month.zfill(2)
+        return  f"{year}.{day}.{month}"
+
+    @staticmethod
+    def create_time(announce_time: tuple) -> datetime:
         datenow = datetime.today()
         day, month, year = datenow.day, datenow.month, datenow.year
         hours, minute = datenow.hour, datenow.minute
