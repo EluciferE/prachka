@@ -33,3 +33,10 @@ def number_of_week(date_):
     d, m, y = map(int, date_.split('.'))
     w = date(y, m, d).isocalendar()[1]
     return w
+
+def valid_date(date) -> bool:
+    d1 = datetime.strptime(date, "%d.%m.%Y")
+    d2 = datetime.today()
+    if (d1 - d2).days < 0:
+        return False
+    return True

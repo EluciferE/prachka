@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Table, Date, Boolean
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -69,6 +69,10 @@ class Note(Base):
     value = Column(String)
     cell = Column(String, nullable=False)
 
+    announceStart = Column(Boolean, nullable=False)
+    announceEnd = Column(Boolean, nullable=False)
+    announceNextDay = Column(Boolean, nullable=False)
+
     def __init__(self, username: str, date: str, day: str, time: str,
                  machine: str, value: str, cell: str):
         self.id = str(uuid1())
@@ -79,6 +83,10 @@ class Note(Base):
         self.machine = machine
         self.value = value
         self.cell = cell
+
+        self.announceStart = False
+        self.announceEnd = False
+        self.announceNextDay = False
 
 
 class AntiSpam(Base):
