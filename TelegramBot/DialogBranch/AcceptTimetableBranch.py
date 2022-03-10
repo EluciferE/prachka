@@ -26,7 +26,7 @@ class AcceptTimetableBranch(Branch):
         tmp = parseTmp(user.tmp)
         day, time, machine = tmp["day"], tmp["time"], tmp["machine"]
 
-        user.tmp = f"{day}/{time}/{machine}/"
+        user.tmp = f"{day}/{machine}/{time}/"
         user.status = STATUS.WRITE_NOTE
 
         self.db.commit()

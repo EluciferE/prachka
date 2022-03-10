@@ -47,7 +47,7 @@ class WriteNoteBranch(Branch):
         day = tmp["day"]
         time = tmp["time"]
         machine = tmp["machine"]
-        user.tmp = f"{day}/{time}/{machine}/{text}"
+        user.tmp = f"{day}/{machine}/{time}/{text}"
 
         self.db.commit()
 

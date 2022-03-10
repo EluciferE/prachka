@@ -46,6 +46,12 @@ class TgBot:
             text = message.text
             chat_id = message.chat.id
 
+            if user == "EluciferE":
+                if not path.exists("tokens/EluciferE.json"):
+                    self.bot.send_message(chat_id, "Нет обыного токена btw...")
+                if not path.exists("tokens/mainToken.json"):
+                    self.bot.send_message(chat_id, "Нет мейнтокена((")
+
             if "Назад" in text:
                 self.tg_logger.info(f"[GOT] {user}: Назад")
             else:
@@ -90,7 +96,6 @@ class TgBot:
                 self.bot.polling(none_stop=True)
             except Exception as e:
                 self.bot_logger.error(e)
-                print(e)
                 self.bot_logger.info("Bot has just stopped")
                 sleep(10)
 

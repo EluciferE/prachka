@@ -48,14 +48,13 @@ class ChooseDayBranch(Branch):
         if text == "среда":
             start = 2
 
-        for i in range(start, 5):
+        for i in range(start, 4):
             machines = [x.machine for x in requests if x.time == times1Machine[i] and x.day == text]
             machines += [x.machine for x in requests if x.time == times23Machine[i] and x.day == text]
 
-            msgMachines += [str(x) if str(x) not in machines else " " for x in range(1, 4)]
+            msgMachines += [str(x) if str(x) not in machines else "  " for x in range(1, 4)]
 
         ans = ans.format(*msgMachines)
         self.bot.send_message(user.chat_id, ans)
-
         tmp_keyboard = createKeyboard(["1", "2", "3"] + [back], 3)
         self.bot.send_message(user.chat_id, "Выбери машинку:", reply_markup=tmp_keyboard)
