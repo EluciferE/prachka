@@ -89,7 +89,7 @@ class SheetParser:
 
                         for dateString, machines in date.items():
 
-                            if machine not in machines or time_ not in machines[time_]:
+                            if machine not in machines or time_ not in machines[machine]:
                                 continue
 
                             if machines[machine][time_]['value'].strip():
