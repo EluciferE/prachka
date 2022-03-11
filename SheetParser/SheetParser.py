@@ -67,6 +67,7 @@ class SheetParser:
 
                 if lastDate:
                     self.__announceUsers(lastDate)
+                    continue
 
                 requests = self.db.query(Request).all()
                 shuffle(requests)
